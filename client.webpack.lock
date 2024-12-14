@@ -1,0 +1,5 @@
+{
+  "https://res.cloudinary.com/dfnuzzpe3/video/upload/v1731003810/video_10s_u4jmot.webm": { "integrity": "sha512-ZaWBy62/wRZJukFIC6dup+4nzKVe75aQCWaJw4xszjdvZ3K7HUJTMemVyKpxp7aTr5X21N1vk7rhZAMYWv3OSg==", "contentType": "video/webm;codecs=vp9" },
+  "https://res.cloudinary.com/dfnuzzpe3/video/upload/v1731153851/1_rwmspr.webm": { "integrity": "sha512-n+9XaBUvkGLs9HOVpiJv4gDGkpSNfs2YMvu/B2U8d9IiMvX9eZF9K9KPTpUe0ZNoiSZxyzFzUSuXHkUnKK65IA==", "contentType": "video/webm;codecs=vp9" },
+  "version": 1
+}
