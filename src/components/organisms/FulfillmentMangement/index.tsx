@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from "react";
+'use client'
+import React, { useEffect, useState } from "react";
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/solid";
 import { Popover, TextField } from "@mui/material";
-import {API_URL} from "@/config/url";
+import { API_URL } from "@/config/url";
 import Image from "next/image";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const FulfillmentManagement: React.FC = () => {
     const [openPopup, setOpenPopup] = useState<boolean>(false);
@@ -137,7 +138,7 @@ const FulfillmentManagement: React.FC = () => {
                                             <h4 className="text-sm font-medium leading-tight line-clamp-1">{product.title}</h4>
                                             <p
                                                 className="text-xs mt-1 overflow-hidden text-ellipsis line-clamp-3"
-                                                dangerouslySetInnerHTML={{__html: product.description}}
+                                                dangerouslySetInnerHTML={{ __html: product.description }}
                                             ></p>
 
                                             {product.price && (
@@ -149,7 +150,7 @@ const FulfillmentManagement: React.FC = () => {
                                 ))}
                             </div>
                             <div className={"cursor-pointer text-center underline text-sm"} onClick={handleNavigateProductPage}>
-                                Hiển thị tất cả kết quả cho "{searchTerm}"
+                                Hiển thị tất cả kết quả cho {searchTerm}
                             </div>
                         </>
                     )}

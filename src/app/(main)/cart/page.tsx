@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import React, { useEffect, useState } from "react";
 import { Typography, Container, Grid, CssBaseline, Button } from "@mui/material";
 import ShoppingCartItem from "../../../../src/components/atom/ShoppingCartItem";
@@ -14,6 +13,7 @@ interface IProduct {
     price: number;
     variants: string;
     subCategory: string;
+    imagePath: string;
 }
 
 interface ICartItem {
@@ -22,10 +22,11 @@ interface ICartItem {
     totalPrice: number;
     product: IProduct;
     currentVariant: string;
+    imagePath: string
 }
 
 interface ICart {
-    id: string;
+    id: string | undefined;
     totalPrice: number;
     totalItem: number;
     cartItem: ICartItem[];
@@ -79,16 +80,6 @@ const ShoppingCartPage: React.FC<IShoppingCartPageProps> = () => {
         fetchCart();
     }, []);
 
-    // Hàm xử lý khi xóa sản phẩm khỏi giỏ hàng
-    const handleRemoveProduct = (productId: string) => {
-        if (carts) {
-            setCarts((prevCarts) => {
-                const updatedCartItems = prevCarts.cartItem.filter((item) => item.product.id !== productId);
-                return { ...prevCarts, cartItem: updatedCartItems };
-            });
-        }
-    };
-
     // Tính tổng tiền giỏ hàng
     const calculateTotalPrice = () => {
         return carts?.cartItem.reduce((total, item) => total + item.totalPrice, 0) ?? 0;
@@ -113,7 +104,7 @@ const ShoppingCartPage: React.FC<IShoppingCartPageProps> = () => {
                                     <Grid item xs={12} key={cartItem.id}>
                                         <ShoppingCartItem
                                             cartItem={cartItem}
-                                            onRemove={handleRemoveProduct} // Truyền hàm xóa sản phẩm
+
                                             fetchCart={fetchCart} // Truyền hàm load lại giỏ hàng
                                         />
                                     </Grid>

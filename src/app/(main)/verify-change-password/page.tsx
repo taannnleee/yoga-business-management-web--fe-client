@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import Input from "@/components/atom/Input";
 import Button from "@/components/atom/Button";
 import { Typography, Box, Divider } from "@mui/material";
@@ -217,9 +217,7 @@ const VerifyAccount: React.FC<ILoginPageProps> = (props) => {
 
                 <Box>
                     <Typography sx={{ fontSize: "14px", color: "GrayText" }}>
-                        By verifying your account, you agree to Market Floor's Terms of
-                        Service and Privacy Policy, as well as the Cookie Policy. This helps
-                        us ensure the security and integrity of our platform.
+ 
                     </Typography>
                 </Box>
                 <Divider sx={{ height: 4, width: "100%" }} />
@@ -233,7 +231,7 @@ const VerifyAccount: React.FC<ILoginPageProps> = (props) => {
                             columnGap: "2px",
                         }}
                     >
-                        Didn't receive one-time password?
+                        Didnt receive one-time password?
                         <Typography
                             style={{
                                 marginLeft: "4px",

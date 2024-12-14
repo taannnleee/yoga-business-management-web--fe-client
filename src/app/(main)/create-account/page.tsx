@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import Button from "@/components/atom/Button";
 import Input from "@/components/atom/Input";
@@ -64,7 +64,7 @@ const CreateAccountPage: React.FC<ICreateAccountPageProps> = (props) => {
             setLoading(false);
             toast.sendToast(
                 "Error",
-                error.message || "Register error",
+
                 "error"
             );
             console.error("Register error:", error);

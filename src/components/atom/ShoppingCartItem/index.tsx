@@ -12,6 +12,7 @@ interface IProduct {
     price: number;
     variants: any;  // Thay đổi kiểu từ string sang any hoặc một kiểu phù hợp
     subCategory: string;
+    imagePath: string
 }
 
 interface ICartItem {
@@ -24,14 +25,14 @@ interface ICartItem {
 }
 interface IInputProps {
     cartItem: ICartItem;
-    onRemove: (productId: string) => void;
+
     fetchCart: () => void;
 }
 
-const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, onRemove, fetchCart }) => {
+const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [quantity, setQuantity] = useState(cartItem.quantity); // Tổng số lượng hiện tại
+    const [quantity, setQuantity] = useState(Number(cartItem.quantity)); // Tổng số lượng hiện tại
     const [changedQuantity, setChangedQuantity] = useState(0); // Số lượng thay đổi
     const debouncedChangedQuantity = useDebounce(changedQuantity, 1000); // Debounce số lượng thay đổi
 
@@ -115,7 +116,7 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, onRemove, fetchCart
     };
 
     const handleDecrease = () => {
-        if (quantity > 1) {
+        if (Number(quantity) > 1) {
             setQuantity((prevQuantity) => prevQuantity - 1); // Giảm tổng số lượng
             setChangedQuantity((prevChanged) => prevChanged - 1); // Giảm số lượng thay đổi
         }
@@ -146,8 +147,7 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, onRemove, fetchCart
             const data = await response.json();
             console.log(data);
 
-            // Gọi hàm onRemove để cập nhật lại giỏ hàng
-            onRemove(cartItem.product.id);
+
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -231,7 +231,7 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, onRemove, fetchCart
                 {/* Tổng tiền */}
                 <Grid item xs={2}>
                     <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                        {(quantity * cartItem.product.price).toLocaleString('vi-VN')} đ {/* Định dạng số tiền với dấu '.' cách 3 số */}
+                        {((Number(quantity) || 0) * (cartItem?.product?.price ?? 0)).toLocaleString('vi-VN')} đ
                     </Typography>
                 </Grid>
 

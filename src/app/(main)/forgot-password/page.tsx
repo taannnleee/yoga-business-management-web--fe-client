@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import Button from "@/components/atom/Button";
 import Input from "@/components/atom/Input";
 import { Box, CircularProgress, Divider } from "@mui/material";

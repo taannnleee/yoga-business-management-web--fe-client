@@ -5,25 +5,34 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/useToast";
 import ConfirmDialog from "@/components/molecules/ConfirmDialog";
 import { apiURL } from "../../../constants";
-import {formatDate} from "@/utils/dateUtils";
+import { formatDate } from "@/utils/dateUtils";
 import StarRating from "@/components/molecules/StarRating";
 import { CiCircleCheck } from "react-icons/ci";
 import Button from "@/components/atom/Button";
-// Define types for props
+
+// Định nghĩa kiểu cho các props
+interface User {
+    id: string;
+    fullname: string;
+    imagePath: string;
+}
+
+interface Variant {
+    value: string;
+}
+
+interface Comment {
+    id: string;
+    ratePoint: number;
+    content: string;
+    user: User;
+    replies: Comment[];
+    createdAt: string;
+    currentVariant: Record<string, Variant>; // Kiểu cho currentVariant
+}
+
 interface IProductCommentCardProps {
-    comment: {
-        id: string;
-        ratePoint: number;
-        content: string;
-        user: {
-            id:string;
-            fullname: string;
-            imagePath: string;
-        };
-        replies: any[];
-        createdAt: string;
-        currentVariant: any;
-    };
+    comment: Comment;
     productDetail: any;
     onReplyingSuccess?: () => void;
 }
@@ -31,10 +40,10 @@ interface IProductCommentCardProps {
 type ICommentMode = "view" | "edit";
 
 const CommentCard: React.FC<IProductCommentCardProps> = ({
-                                                             comment,
-                                                             productDetail,
-                                                             onReplyingSuccess,
-                                                         }) => {
+    comment,
+    productDetail,
+    onReplyingSuccess,
+}) => {
     const { register, control, handleSubmit, setValue, watch } = useForm();
     const [isReplying, setIsReplying] = useState<boolean>(false);
     const [isTurningOnReply, setIsTurningOnReply] = useState<boolean>(false);
@@ -45,7 +54,7 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
     const toast = useToast();
     const accessToken = localStorage.getItem("accessToken");
 
-    const handlePostReply = async (comment) => {
+    const handlePostReply = async (comment: Comment) => {
         try {
             setIsReplying(true);
             if (watch("reply")?.length > 0) {
@@ -53,7 +62,7 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
                     `${apiURL}/api/comment`,
                     {
                         content: watch("reply") || "",
-                        parentCommentId:comment.id || null,
+                        parentCommentId: comment.id || null,
                         productId: productDetail.id,
                     },
                     {
@@ -76,14 +85,15 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
             setIsReplying(false);
         }
     };
-    const getVariantString = (currentVariant) => {
+
+    const getVariantString = (currentVariant: Record<string, Variant>) => {
         if (!currentVariant) return ""; // Nếu không có currentVariant, trả về chuỗi rỗng
 
-        // Lấy tất cả các `value` trong currentVariant
         return Object.values(currentVariant)
-            .map((variant) => variant.value) // Chỉ lấy giá trị của từng variant
+            .map((variant: Variant) => variant.value) // Đảm bảo variant là kiểu Variant
             .join(", "); // Nối chúng lại bằng dấu phẩy
     };
+
     const handleDeleteComment = async () => {
         try {
             setIsDeleting(true);
@@ -147,7 +157,6 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
         setIsTurningOnReply(true);
     };
 
-    // @ts-ignore
     return (
         <>
             {openConfirmDialog && (
@@ -167,13 +176,12 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
                             {comment?.user.imagePath ? (
                                 <img
                                     src={comment.user.imagePath}
-                                    alt={comment.user.fullname || "User Avatar"}  // Fallback alt text
+                                    alt={comment.user.fullname || "User Avatar"}
                                     className="bg-primary-600 text-center text-secondary-500 cursor-pointer rounded-full w-[40px] h-[40px]"
                                 />
                             ) : (
                                 <div className="bg-primary-600 text-center text-secondary-500 w-[40px] h-[40px] cursor-pointer rounded-full flex items-center justify-center box-border">
-                                    {/* Default avatar if no image */}
-                                    {comment?.user.fullname?.[0] || 'U'}
+                                    {comment?.user.fullname?.[0] || "U"}
                                 </div>
                             )}
                             <div>
@@ -182,15 +190,16 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
                                         {comment?.user.fullname}
                                     </p>
                                     <p className="text-secondary-800 text-[10px] tablet:text-xs text-sm tablet:ml-1">
-                                        {comment.ratePoint !== null &&
-                                            <StarRating rating={comment.ratePoint}/>}
+                                        {/* {comment.ratePoint !== null && <StarRating rating={comment.ratePoint}/>} */}
                                     </p>
                                     <p className="text-black-500 text-[14px] font-bold tablet:text-xs text-sm tablet:ml-1 mt-5">
                                         {comment.ratePoint !== null && (
                                             <>
-                                                {`vào lúc ${formatDate(comment.createdAt)} | Phân loại hàng: ${getVariantString(comment.currentVariant)} `}
+                                                {`vào lúc ${formatDate(comment.createdAt)} | Phân loại hàng: ${getVariantString(
+                                                    comment.currentVariant
+                                                )} `}
                                                 <div className={"flex items-center space-x-2"}>
-                                                    <CiCircleCheck className={"text-blue-500 w-6 h-6"}/>
+                                                    <CiCircleCheck className={"text-blue-500 w-6 h-6"} />
                                                     <div className={"text-blue-500 "}>Đã mua hàng tại cửa hàng của chúng tôi</div>
                                                 </div>
                                             </>
@@ -198,8 +207,7 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
                                     </p>
 
                                     <p className="text-secondary-800 text-[10px] tablet:text-xs text-sm tablet:ml-1 mt-5">
-                                        {comment.ratePoint === null &&
-                                            `vào lúc ${formatDate(comment.createdAt)}`}
+                                        {comment.ratePoint === null && `vào lúc ${formatDate(comment.createdAt)}`}
                                     </p>
                                 </div>
 
@@ -270,14 +278,14 @@ const CommentCard: React.FC<IProductCommentCardProps> = ({
                 )}
 
                 <div>
-                    {comment.replies?.map((reply: any, replyIndex: number) => (
+                    {comment.replies?.map((reply, replyIndex) => (
                         <div className="relative ml-2" key={`reply-${replyIndex}`}>
                             <svg className="absolute left-0 top-0 h-full" width="40" height="100%" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10 0 v50 M10 50 h30" stroke="#cbd5e0" strokeWidth="0.5" />
                             </svg>
                             <div className="ml-8 mt-2 border-t border-secondary-200 pl-4">
                                 <CommentCard
-                                    comment={reply} // Pass the correct props
+                                    comment={reply}
                                     productDetail={productDetail}
                                     onReplyingSuccess={onReplyingSuccess}
                                 />

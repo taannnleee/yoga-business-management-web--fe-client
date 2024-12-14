@@ -1,21 +1,43 @@
+// RightSideGetAllProduct.tsx
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import {FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Select, TextField} from '@mui/material';
-import {ProductCard} from '@/components/molecules/ProductCard'; // Import ProductCard
+import { FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { ProductCard } from '@/components/molecules/ProductCard'; // Import ProductCard
 import BottomContent from "@/components/molecules/BottomContent";
-import {ProductCardSkeleton} from "@/components/molecules/ProductCard/skeleton"; // Import BottomContent
+import { ProductCardSkeleton } from "@/components/molecules/ProductCard/skeleton"; // Import BottomContent
 import { API_URL } from "@/config/url";
-import {MagnifyingGlassCircleIcon} from "@heroicons/react/24/solid";
-import {Clear} from "@mui/icons-material";
-export const RightSideGetAllProduct: React.FC = (props) => {
+import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/solid";
+import { Clear } from "@mui/icons-material";
+
+// Định nghĩa kiểu cho Props
+interface RightSideGetAllProductProps {
+    searchTerm: string;
+    setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+    page: number;
+    setPage: React.Dispatch<React.SetStateAction<number>>;
+    itemsPerPage: number;
+    setItemsPerPage: React.Dispatch<React.SetStateAction<number>>;
+    totalItems: number;
+    setTotalItems: React.Dispatch<React.SetStateAction<number>>;
+}
+
+export const RightSideGetAllProduct: React.FC<RightSideGetAllProductProps> = ({
+    searchTerm,
+    setSearchTerm,
+    page,
+    setPage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalItems,
+    setTotalItems
+}) => {
     const selectedCategory = useSelector((state: RootState) => state.category.selectedCategory);
     const selectedSubCategory = useSelector((state: RootState) => state.category.selectedSubCategory);
     const [selectedSort, setSelectedSort] = useState('');
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const { page, setPage, itemsPerPage, setItemsPerPage, totalItems, setTotalItems,searchTerm, setSearchTerm } = props;
-    // Pagination state
+
     const fetchProducts = async () => {
         setLoading(true);
         try {
@@ -31,6 +53,7 @@ export const RightSideGetAllProduct: React.FC = (props) => {
             if (searchTerm) {
                 url += `&keyword=${encodeURIComponent(searchTerm)}`;
             }
+
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -53,10 +76,9 @@ export const RightSideGetAllProduct: React.FC = (props) => {
         }
     };
 
-    // Call API on dependency changes
     useEffect(() => {
         fetchProducts();
-    }, [selectedSubCategory, selectedSort, page, itemsPerPage,searchTerm]);
+    }, [selectedSubCategory, selectedSort, page, itemsPerPage, searchTerm]);
 
     const handleSortChange = (event: React.ChangeEvent<{ value: unknown }>) => {
         setSelectedSort(event.target.value as string);
@@ -65,6 +87,10 @@ export const RightSideGetAllProduct: React.FC = (props) => {
     const onRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setItemsPerPage(Number(e.target.value));
         setPage(1); // Reset to first page when changing items per page
+    };
+
+    const handleOpenModal = (productId: string) => {
+        console.log(`Open modal for product with id: ${productId}`);
     };
 
     return (
@@ -112,8 +138,7 @@ export const RightSideGetAllProduct: React.FC = (props) => {
                             labelId="sort-select-label"
                             id="sort-select"
                             value={selectedSort}
-                            label="Sắp xếp"
-                            onChange={handleSortChange}
+                            // onChange={handleSortChange}
                             variant="filled"
                         >
                             <MenuItem className="text-xs" value="">Mặc định</MenuItem>
@@ -130,7 +155,7 @@ export const RightSideGetAllProduct: React.FC = (props) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-screen-lg mt-8 mx-auto">
                 {loading ? (
-                    <ProductCardSkeleton/>
+                    <ProductCardSkeleton />
                 ) : products.length === 0 ? (
                     <div className="col-span-full text-center text-xl text-gray-500">
                         Shop chưa nhập loại sản phẩm này 😢 , vui lòng chọn loại sản phẩm khác
@@ -141,26 +166,10 @@ export const RightSideGetAllProduct: React.FC = (props) => {
                             key={product.id}
                             product={product}
                             loading={loading}
-                            renderStars={(rating) => (
-                                <div>{'⭐'.repeat(rating)}</div>
-                            )}
-                            handleOpenModal={() => {
-                            }}
                         />
                     ))
                 )}
             </div>
-
-            {/* Add BottomContent for Pagination */}
-            <BottomContent
-                totalItems={totalItems}
-                page={page}
-                pageSize={Math.ceil(totalItems / itemsPerPage)}
-                onRowsPerPageChange={onRowsPerPageChange}
-                onNextPage={() => setPage((prev) => Math.min(prev + 1, Math.ceil(totalItems / itemsPerPage)))}
-                onPreviousPage={() => setPage((prev) => Math.max(prev - 1, 1))}
-                setPage={setPage}
-            />
         </div>
     );
 };

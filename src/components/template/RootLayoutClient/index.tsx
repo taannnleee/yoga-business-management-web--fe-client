@@ -1,6 +1,6 @@
 // src/components/layout/RootLayoutClient.tsx
 
-"use client"; // Chỉ định đây là một client-side component
+'use client' // Chỉ định đây là một client-side component
 
 import { Provider } from "react-redux";
 import store from "@/redux/store"; // Import Redux store

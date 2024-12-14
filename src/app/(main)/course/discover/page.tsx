@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import React, { useEffect, useState } from "react";
 import CourseCard from "@/components/organisms/CourseCard";
 import { API_URL } from "@/config/url";

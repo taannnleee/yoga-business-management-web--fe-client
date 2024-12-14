@@ -1,4 +1,3 @@
-// RightSide.tsx
 import React, { useState } from "react";
 import { Typography, Button, CircularProgress } from '@mui/material';
 import { CustomNumberInput } from "@/components/atom/CustomNumberInput";
@@ -8,12 +7,20 @@ import { useToast } from "@/hooks/useToast";
 import { useDispatch } from "react-redux";
 import { API_URL } from "@/config/url";
 
+// Define the correct types for variants
+interface Variant {
+    [key: string]: {
+        value: string;
+        image: string;
+    };
+}
+
 interface RightSideProps {
     product: any;
     quantity: number;
     setQuantity: (quantity: React.SetStateAction<any>) => void;
-    handleAddToCart: () => void;
-    currentVariant: any;
+    handleAddToCart?: () => void;
+    currentVariant: Variant;
     handleVariantSelect: (variantType: string, value: string, image: string) => void;
 }
 
@@ -23,6 +30,7 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
     const toast = useToast();
+
     const handleAddToCart = async () => {
         setLoading(true);
         try {
@@ -50,17 +58,17 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
             dispatch(incrementTotalItems());
         } catch (err: any) {
             console.error("Error adding product to cart:", err.message);
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <div className="space-y-4">
             <Typography variant="h6" className="font-bold text-ellipsis text-black">
                 {product?.title}
             </Typography>
+
             {/* Ratings and Reviews */}
             <div className="flex items-center gap-2">
                 <Typography variant="subtitle1" className="text-gray-600 flex justify-between items-center space-x-4">
@@ -70,7 +78,7 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                             {product?.averageRating?.toFixed(1)}
                         </span>
                         <span className="text-yellow-500">
-                            {Array.from({length: 5}, (_, index) => {
+                            {Array.from({ length: 5 }, (_, index) => {
                                 if (product?.averageRating > index + 0.5) {
                                     return "⭐"; // Full star
                                 } else if (product?.averageRating > index) {
@@ -80,20 +88,18 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                                 }
                             })}
                         </span>
-                        <span className="text-gray-500">|</span> {/* Separator | */}
-
+                        <span className="text-gray-500">|</span>
                     </div>
 
                     {/* Separator and Views/Sales */}
                     <div className="flex items-center space-x-2">
                         <span className="text-black font-semibold">100 Đánh giá/Bình luận</span>
-                        <span className="text-gray-500">|</span> {/* Separator | */}
+                        <span className="text-gray-500">|</span>
                         <span className="text-black font-semibold">{product?.sold} Đã mua</span>
                     </div>
                 </Typography>
-
-
             </div>
+
             <Typography variant="subtitle1" className="text-gray-600">
                 Mã sản phẩm: <span className="text-red-500">{product?.code}</span>
             </Typography>
@@ -103,27 +109,24 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
             <Typography variant="h3" color={"red"}>
                 {product?.price?.toLocaleString()}₫
             </Typography>
-            {/*<Typography variant="body2" className="text-black max-w-xl overflow-hidden">*/}
-            {/*    {product?.description || "Thông tin sản phẩm đang cập nhật."}*/}
-            {/*</Typography>*/}
 
             <div>
                 {product?.variants &&
                     Object.entries(product.variants).map(([variantType, variantValues]) => (
                         <div key={variantType} className={"my-4"}>
                             <Typography variant="subtitle1" className="text-black font-bold">
-                                {variantType.charAt(0).toUpperCase() + variantType.slice(1)} {/* Hiển thị tên variant như 'Color', 'Size',... */}
+                                {variantType.charAt(0).toUpperCase() + variantType.slice(1)}
                             </Typography>
                             <div className="flex items-center space-x-4">
-                                {Object.entries(variantValues).map(([value, image], index) => (
+                                {Object.entries(variantValues as { [key: string]: string }).map(([value, image], index) => (
                                     <div
                                         key={index}
                                         className={"flex items-center justify-evenly mr-4"}
-                                        onClick={() => handleVariantSelect(variantType, value, image)}
+                                        onClick={() => handleVariantSelect(variantType, value, image as string)} // Explicitly cast image to string
                                     >
                                         <Typography className="cursor-pointer">
                                             <div className={"flex items-center justify-start space-x-2"}>
-                                                {/* Kiểm tra nếu là color thì hiển thị ảnh */}
+                                                {/* Check if the variant is color and display image */}
                                                 {variantType === 'color' ? (
                                                     <>
                                                         <Image
@@ -137,7 +140,6 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                                                             {value}
                                                         </Typography>
                                                     </>
-
                                                 ) : (
                                                     <div
                                                         className={`flex items-center justify-center w-11 h-11 border border-gray-300 rounded-md cursor-pointer ${value === currentVariant[variantType]?.value ? 'border-2 border-red-800' : ''}`}
@@ -145,8 +147,6 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                                                         <Typography className="text-center">{value}</Typography>
                                                     </div>
                                                 )}
-                                                {/* Hiển thị tên value cho tất cả các variants */}
-
                                             </div>
                                         </Typography>
                                     </div>
@@ -157,17 +157,15 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
             </div>
 
             <div className="flex items-center space-x-4 mt-4">
-                <span>
-                    Số lượng:
-                </span>
+                <span>Số lượng:</span>
                 <CustomNumberInput
                     aria-label="Quantity"
                     placeholder="Nhập số lượng…"
                     value={quantity}
                     onChange={(event, val) => setQuantity(val)}
                 />
-
             </div>
+
             <div className="flex items-center space-x-4 mt-4">
                 <Button
                     sx={{
@@ -199,9 +197,7 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                 >
                     MUA NGAY
                 </Button>
-
             </div>
         </div>
     );
 };
-

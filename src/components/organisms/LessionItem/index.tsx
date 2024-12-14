@@ -1,4 +1,3 @@
-"use client"; // Assuming you're using Next.js
 
 import React from 'react';
 import { useRouter } from 'next/navigation';

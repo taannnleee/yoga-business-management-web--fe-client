@@ -16,10 +16,7 @@ interface Address {
 }
 
 interface AddressSelectionProps {
-    addresses: Address[];
-    loading: boolean;
-    setShippingInfo: React.Dispatch<React.SetStateAction<any>>;
-    addNewAddress: (address: Address) => void;
+
     selectedAddressId: string;
     setSelectedAddressId: React.Dispatch<React.SetStateAction<string>>;
     isAddressValid: boolean;
@@ -28,12 +25,9 @@ interface AddressSelectionProps {
 }
 
 const AddressSelection: React.FC<AddressSelectionProps> = ({
-    addresses,
-    loading,
-    setShippingInfo,
+
     selectedAddressId,
     setSelectedAddressId,
-    addNewAddress,
     isAddressValid,
     setIsAddressValid
 }) => {
@@ -51,9 +45,9 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
             address.fullName && address.fullName !== "" &&
             address.phone && address.phone !== ""
         ) {
-            setIsAddressValid(true); // All fields are valid
+            setIsAddressValid(true);  // Cập nhật trực tiếp trạng thái là hợp lệ
         } else {
-            setIsAddressValid(false); // One or more fields are empty
+            setIsAddressValid(false);  // Cập nhật trạng thái là không hợp lệ
         }
     };
 
@@ -133,7 +127,7 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                     setSelectedAddressId(id);
 
                     // Validate the address after setting the shipping info
-                    validateAddress(address);
+                    // validateAddress(address);
                 } else {
                     console.error("Failed to fetch address:", data.message);
                 }
@@ -152,7 +146,7 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                 <h2 className="text-xl font-bold mb-4 mx-2 text-orange-600">Địa chỉ nhận hàng</h2>
             </div>
 
-            {loading || !shippingInfo ? (
+            {!shippingInfo ? (
                 <div className="space-y-2">
                     <Skeleton variant="text" width="60%" height={30} />
                     <Skeleton variant="text" width="80%" height={20} />
@@ -185,7 +179,7 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                 Chọn địa chỉ
             </button>
 
-            {isModalOpen && <AddAddressModal
+            {/* {isModalOpen && <AddAddressModal
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
                 addNewAddress={addNewAddress}
@@ -199,7 +193,7 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                     onAddressSelect={handleAddressSelect}
                     openAddAddressModal={openAddModal}
                 />
-            )}
+            )} */}
         </div>
     );
 };

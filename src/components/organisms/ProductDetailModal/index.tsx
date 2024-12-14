@@ -1,17 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import {DialogContent, Typography, Button, CircularProgress} from '@mui/material';
+import { DialogContent, Typography, Button, CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import { CustomNumberInput } from "@/components/atom/CustomNumberInput";
 import { useRouter } from 'next/navigation';
 import { FaRegHeart, FaHeart, FaSearchPlus } from "react-icons/fa";
 import RichTextDisplay from "@/components/organisms/RichTextDisplay";
-import {useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
+
+interface Variant {
+    [key: string]: {
+        value: string;
+        image: string;
+    };
+}
+
+interface Product {
+    id: string;
+    title: string;
+    brand: string;
+    price: number;
+    description: string;
+    imagePath: string;
+    variants: {
+        [key: string]: { [value: string]: string }; // key is variant type, value is an object with variant options (value -> image)
+    };
+}
+
 interface Props {
-    selectedProduct: any;
+    selectedProduct: Product;
     quantity: number;
     setQuantity: (quantity: React.SetStateAction<any> | null) => void;
     handleAddToCart: () => void;
-    handleVariantChange: (variant: any) => void;
+    handleVariantChange: (variant: Variant) => void;
 }
 
 const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddToCart, handleVariantChange }: Props) => {
@@ -21,10 +41,7 @@ const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddT
     const [selectedImageLeft, setSelectedImageLeft] = useState(selectedProduct?.imagePath || "");
     const [selectedImageRight, setSelectedImageRight] = useState("");
     const [selectedImage, setSelectedImage] = useState(selectedImageLeft || selectedImageRight);
-    const [currentVariant, setCurrentVariant] = useState<any>({});
-
-    console.log("kkkk");
-    console.log("currentVariant", currentVariant);
+    const [currentVariant, setCurrentVariant] = useState<Variant>({});
 
     const handleVariantSelect = (variantType: string, value: string, image: string) => {
         const updatedVariant = {
@@ -43,9 +60,8 @@ const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddT
 
     useEffect(() => {
         // Chọn variant đầu tiên tự động khi Modal được hiển thị
-        const defaultVariants: any = {};
+        const defaultVariants: Variant = {};
 
-        // Duyệt qua các variant và chọn cái đầu tiên
         if (selectedProduct?.variants) {
             Object.entries(selectedProduct.variants).forEach(([variantType, variantValues]) => {
                 const firstValue = Object.entries(variantValues)[0];
@@ -53,8 +69,8 @@ const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddT
                     const [value, image] = firstValue;
                     defaultVariants[variantType] = { value, image };
                     if (variantType === 'color') {
-                        setSelectedImageLeft(image);  // Set ảnh màu đầu tiên
-                        setSelectedImage(image);      // Chọn ảnh đầu tiên làm ảnh hiện tại
+                        setSelectedImageLeft(image); // Set ảnh màu đầu tiên
+                        setSelectedImage(image); // Chọn ảnh đầu tiên làm ảnh hiện tại
                     }
                 }
             });
@@ -62,22 +78,27 @@ const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddT
         setCurrentVariant(defaultVariants);
         handleVariantChange(defaultVariants);
     }, [selectedProduct]);
-    const handleImageLeftClick = (image: unknown) => {
+
+    const handleImageLeftClick = (image: string) => {
         setSelectedImageLeft(image);
         setSelectedImage(image);
     };
+
     const handleAddToCartClick = () => {
-        setLoading(true);  // Set loading state to true when clicked
-        handleAddToCart();  // Your add to cart logic
+        setLoading(true); // Set loading state to true when clicked
+        handleAddToCart(); // Your add to cart logic
         setTimeout(() => {
-            setLoading(false);  // Set loading state to false after action completes (example with timeout)
-        }, 4000);  // Simulate a delay for the action (e.g., network request)
+            setLoading(false); // Set loading state to false after action completes (example with timeout)
+        }, 4000); // Simulate a delay for the action (e.g., network request)
     };
-    const handleImageRightClick = (image: unknown) => {
+
+    const handleImageRightClick = (image: string) => {
         setSelectedImageRight(image);
         setSelectedImage(image);
     };
+
     const isFavorited = false;
+
     return (
         <DialogContent className={"w-[1030px] h-[559px]"}>
             <div className="flex items-center space-x-8">
@@ -104,14 +125,12 @@ const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddT
                         />
                     </div>
 
-
                     {/* Các ảnh nhỏ bên dưới ảnh lớn */}
                     <div className="mt-4 flex space-x-4 overflow-x-auto">
                         {selectedProduct?.variants?.color &&
                             Object.entries(selectedProduct.variants.color).map(([color, image], index) => {
                                 return image ? (
-                                    <div key={index} className="flex flex-col items-center"
-                                        onClick={() => handleImageLeftClick(image)}>
+                                    <div key={index} className="flex flex-col items-center" onClick={() => handleImageLeftClick(image)}>
                                         <Image
                                             src={typeof image === 'string' && image !== '' ? image : '/path/to/fallback/image.jpg'}
                                             alt={`${color} image`}
@@ -178,7 +197,6 @@ const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddT
                                                                     {value}
                                                                 </Typography>
                                                             </>
-
                                                         ) : (
                                                             <div
                                                                 className={`flex items-center justify-center w-11 h-11 border border-gray-300 rounded-md cursor-pointer ${value === currentVariant[variantType]?.value ? 'border-2 border-red-800' : ''}`}
@@ -186,8 +204,6 @@ const ProductDetailModal = ({ selectedProduct, quantity, setQuantity, handleAddT
                                                                 <Typography className="text-center">{value}</Typography>
                                                             </div>
                                                         )}
-                                                        {/* Hiển thị tên value cho tất cả các variants */}
-
                                                     </div>
                                                 </Typography>
                                             </div>

@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import React, { useState, useEffect } from "react";
 import { Grid, Card, CardContent, CardMedia, Typography, Button } from "@mui/material";
 const token = localStorage.getItem("accessToken");

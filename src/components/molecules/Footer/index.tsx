@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import React from "react";
 import Logo from "@/components/atom/Logo";
@@ -14,7 +14,7 @@ const FooterSection: React.FC<IFooterSectionProps> = () => {
           <div className="mt-3 pr-[100px]">
             <p className="flex-wrap text-gray-600">
               Sell anything, buy anything, and discover a world of endless
-              possibilities. Whether you're looking to declutter your home, find
+              possibilities. Whether youre looking to declutter your home, find
               unique treasures, or start a new business, our platform provides
               the perfect marketplace for all your needs.
             </p>

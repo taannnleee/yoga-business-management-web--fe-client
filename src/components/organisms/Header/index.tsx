@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -173,7 +173,7 @@ const HeaderV2: React.FC<IHeaderV2Props> = (props) => {
               Giới thiệu
             </a>
 
-            <HoverDropdown buttonText="Sản phẩm" items={dropdownItems} />
+            {/* <HoverDropdown buttonText="Sản phẩm" items={dropdownItems} /> */}
 
 
             {/* Tư vấn dropdown */}

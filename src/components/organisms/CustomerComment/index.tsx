@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -130,7 +130,7 @@ const CustomerComment: React.FC<IProductCommentsProps> = ({ productDetail, class
                                 return (
                                     <CommentCard
                                         key={index}
-                                        commentMode="view"
+                                        // commentMode="view"
                                         comment={comment}
                                         productDetail={productDetail}
                                         onReplyingSuccess={getListComments}/>

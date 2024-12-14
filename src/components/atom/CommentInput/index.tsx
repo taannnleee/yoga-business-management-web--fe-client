@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import { TextField, Button, Avatar, CircularProgress } from "@mui/material";
 import React from "react";
 import RichTextInput from "@/components/atom/RichTextInput";

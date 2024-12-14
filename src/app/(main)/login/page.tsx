@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import Button from "@/components/atom/Button";
 import Input from "@/components/atom/Input";
@@ -179,7 +179,7 @@ const LoginPage: React.FC<ILoginPageProps> = (props) => {
 
         <Box>
           <Typography sx={{ fontSize: "14px", color: "GrayText" }}>
-            By signing in, you agree to Market Floor's Terms of Service and Privacy
+            By signing in, you agree to Market Floors Terms of Service and Privacy
             Policy, as well as the Cookie Policy.
           </Typography>
         </Box>
@@ -194,7 +194,7 @@ const LoginPage: React.FC<ILoginPageProps> = (props) => {
               columnGap: "2px",
             }}
           >
-            Don't have an account?
+            Dont have an account?
             <Link
               style={{ marginLeft: "4px", textDecoration: "underline" }}
               href="/create-account"

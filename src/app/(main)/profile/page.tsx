@@ -19,7 +19,8 @@ import { useToast } from "@/hooks/useToast";
 
 const AccountInfo: React.FC = () => {
     const toast = useToast();
-    const [activeTab, setActiveTab] = useState<'accountInfo' | 'changePassword'>('accountInfo');
+    const [activeTab, setActiveTab] = useState<string>('accountInfo');
+
     const [profileData, setProfileData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
