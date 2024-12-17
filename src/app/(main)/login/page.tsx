@@ -10,7 +10,10 @@ import { useToast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_URL } from "@/config/url";
-const token = localStorage.getItem("accessToken");
+var token = null;
+if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+  token = localStorage.getItem("accessToken");
+}
 
 interface ILoginPageProps { }
 
@@ -105,7 +108,7 @@ const LoginPage: React.FC<ILoginPageProps> = (props) => {
       );
     }
   };
-  
+
   return (
     <div className="w-full h-auto flex justify-center items-center bg-white">
       <Box

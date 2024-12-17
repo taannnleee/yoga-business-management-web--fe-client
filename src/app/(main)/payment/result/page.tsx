@@ -1,26 +1,49 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Button from "@/components/atom/Button";
 import { API_URL } from "@/config/url";
+
 const PaymentResult = () => {
-    const searchParams = useSearchParams();
-    const status = searchParams.get('status');
-    const transactionId = searchParams.get('transactionId');
-    const addressId = searchParams.get('addressId');
-    const paymentMethod = searchParams.get('paymentMethod');
-    const vnp_Amount = searchParams.get('vnp_Amount');
+    const [isClient, setIsClient] = useState(false); // Track whether the code is running on the client
+    const [status, setStatus] = useState<string | null>(null);
+    const [transactionId, setTransactionId] = useState<string | null>(null);
+    const [addressId, setAddressId] = useState<string | null>(null);
+    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+    const [vnp_Amount, setVnpAmount] = useState<string | null>(null);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [isOrderCreated, setIsOrderCreated] = useState(false); // Guard variable
+    const [isOrderCreated, setIsOrderCreated] = useState(false);
+    const [token, setToken] = useState<string | null>(null); // Track token state
+
+    useEffect(() => {
+        // Check if the code is running in the browser
+        setIsClient(true);
+
+        // Get token from localStorage after component mount
+        if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+            const storedToken = localStorage.getItem("accessToken");
+            setToken(storedToken);
+        }
+
+        // Extract search params when running on client
+        if (isClient) {
+            const searchParams = new URLSearchParams(window.location.search);
+            setStatus(searchParams.get('status'));
+            setTransactionId(searchParams.get('transactionId'));
+            setAddressId(searchParams.get('addressId'));
+            setPaymentMethod(searchParams.get('paymentMethod'));
+            setVnpAmount(searchParams.get('vnp_Amount'));
+        }
+    }, [isClient]); // Run after the component is mounted
 
     const createOrder = async () => {
-        if (isOrderCreated) return; // Prevent duplicate calls
-        setIsOrderCreated(true); // Set flag to true
+        if (isOrderCreated || !token) return;
 
-        const token = localStorage.getItem("accessToken");
+        setIsOrderCreated(true);
         setLoading(true);
+
         try {
             const response = await fetch(`${API_URL}/api/order/create-order`, {
                 method: "POST",
@@ -38,7 +61,7 @@ const PaymentResult = () => {
 
             const data = await response.json();
             console.log("Order created successfully:", data);
-        } catch (error:any) {
+        } catch (error: any) {
             console.error("Error creating order:", error.message);
             setError(error.message);
         } finally {
@@ -52,57 +75,59 @@ const PaymentResult = () => {
         }
     }, [status]);
 
+    if (!isClient) {
+        return <div>Loading...</div>; // Avoid SSR issues and show loading until mounted
+    }
+
     return (
         <div className="max-w-2xl mx-auto p-6 border rounded-lg shadow-lg">
             <h2 className={`text-2xl font-semibold mb-4 ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
                 {status === 'success' ? 'Giao dịch được thực hiện thành công' : 'Giao dịch thất bại'}
             </h2>
-            {status === 'success' && (
-                <p className="mb-6">Cảm ơn quý khách đã sử dụng dịch vụ.</p>
-            )}
+            {status === 'success' && <p className="mb-6">Cảm ơn quý khách đã sử dụng dịch vụ.</p>}
 
             <table className="min-w-full table-auto border-collapse">
                 <tbody>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Merchant ID</td>
-                    <td className="px-4 py-2">CTTVNP01</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Merchant Name</td>
-                    <td className="px-4 py-2">VNPAY Demo</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Merchant Transaction Reference</td>
-                    <td className="px-4 py-2">{transactionId}</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Transaction Info</td>
-                    <td className="px-4 py-2">Thanh toán đơn hàng thời gian: {new Date().toLocaleString()}</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Amount</td>
-                    <td className="px-4 py-2">{vnp_Amount}</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Currency</td>
-                    <td className="px-4 py-2">VND</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Transaction Response Code</td>
-                    <td className="px-4 py-2">00</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Message</td>
-                    <td className="px-4 py-2">Giao dịch được thực hiện thành công. Cảm ơn quý khách đã sử dụng dịch vụ</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Transaction Number</td>
-                    <td className="px-4 py-2">{transactionId}</td>
-                </tr>
-                <tr className="border-b">
-                    <td className="px-4 py-2 font-medium">Bank</td>
-                    <td className="px-4 py-2">NCB</td>
-                </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Merchant ID</td>
+                        <td className="px-4 py-2">CTTVNP01</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Merchant Name</td>
+                        <td className="px-4 py-2">VNPAY Demo</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Merchant Transaction Reference</td>
+                        <td className="px-4 py-2">{transactionId}</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Transaction Info</td>
+                        <td className="px-4 py-2">Thanh toán đơn hàng thời gian: {new Date().toLocaleString()}</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Amount</td>
+                        <td className="px-4 py-2">{vnp_Amount}</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Currency</td>
+                        <td className="px-4 py-2">VND</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Transaction Response Code</td>
+                        <td className="px-4 py-2">00</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Message</td>
+                        <td className="px-4 py-2">Giao dịch được thực hiện thành công. Cảm ơn quý khách đã sử dụng dịch vụ</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Transaction Number</td>
+                        <td className="px-4 py-2">{transactionId}</td>
+                    </tr>
+                    <tr className="border-b">
+                        <td className="px-4 py-2 font-medium">Bank</td>
+                        <td className="px-4 py-2">NCB</td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -114,7 +139,6 @@ const PaymentResult = () => {
             ) : (
                 <div className="flex space-x-4">
                     <Button className={"bg-red-500 text-white"}>
-
                         <a href="/checkout">Thử lại</a>
                     </Button>
                     <Button>

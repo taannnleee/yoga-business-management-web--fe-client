@@ -5,18 +5,21 @@ import "slick-carousel/slick/slick-theme.css";
 
 import { redirect } from "next/navigation";
 
-import {useEffect, useLayoutEffect} from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useRouter } from "next/navigation";
 import HomePage from "@/app/(main)/home/page";
 
+let token: string | null = null;
+if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+    token = localStorage.getItem("accessToken");
+}
 export default function Home() {
     const router = useRouter();
 
     useLayoutEffect(() => {
         // Kiểm tra nếu accessToken tồn tại trong localStorage
-        const accessToken = localStorage.getItem("accessToken");
 
-        if (accessToken) {
+        if (token) {
             // Nếu tồn tại, redirect đến "/home"
             router.push("/home");
         } else {
@@ -26,6 +29,6 @@ export default function Home() {
     }, [router]);
 
     return (
-        <HomePage/>
+        <HomePage />
     );
 }

@@ -40,46 +40,55 @@ const HeaderV2: React.FC<IHeaderV2Props> = (props) => {
   // Handle the hover modal visibility
   const [isHovered, setIsHovered] = useState(false);
   // Check if the access token exists
-  const accessToken = localStorage.getItem("accessToken");
+  var accessToken = null;
+  if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+    // Đảm bảo localStorage chỉ được sử dụng trong môi trường client-side
+    accessToken = localStorage.getItem("accessToken");
+  }
+
 
   // Hàm logout sẽ gọi API và xử lý đăng xuất
   const logout = async () => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        return;
-      }
-      console.log("hehehe")
+    if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+      // Đảm bảo localStorage chỉ được sử dụng trong môi trường client-side
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          return;
+        }
+        console.log("hehehe")
 
-      // Gọi API logout sử dụng fetch
-      const response = await fetch(`${API_URL}/api/auth/logout`, {
-        method: 'POST', // Phương thức POST
-        headers: {
-          'Authorization': `Bearer ${token}`, // Gửi token xác thực trong header
-          'Content-Type': 'application/json', // Đảm bảo body là JSON (mặc dù ở đây body rỗng)
-        },
-      });
-      console.log("hehehe")
-      console.log(response)
+        // Gọi API logout sử dụng fetch
+        const response = await fetch(`${API_URL}/api/auth/logout`, {
+          method: 'POST', // Phương thức POST
+          headers: {
+            'Authorization': `Bearer ${token}`, // Gửi token xác thực trong header
+            'Content-Type': 'application/json', // Đảm bảo body là JSON (mặc dù ở đây body rỗng)
+          },
+        });
+        console.log("hehehe")
+        console.log(response)
 
-      // Kiểm tra nếu logout thành công
-      if (response.ok) {
-        // Xóa token khỏi localStorage
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        toast.sendToast("Success", "Đăng xuất thành công");
+        // Kiểm tra nếu logout thành công
+        if (response.ok) {
+          // Xóa token khỏi localStorage
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          toast.sendToast("Success", "Đăng xuất thành công");
 
-        // Điều hướng về trang chủ
-        router.replace("/home");
-      } else {
-        // Xử lý trường hợp logout không thành công
+          // Điều hướng về trang chủ
+          router.replace("/home");
+        } else {
+          // Xử lý trường hợp logout không thành công
+          toast.sendToast("Error", "Đăng xuất thất bại, vui lòng thử lại.");
+        }
+      } catch (error) {
+        // Xử lý lỗi trong quá trình gọi API
+        console.error("Logout error", error);
         toast.sendToast("Error", "Đăng xuất thất bại, vui lòng thử lại.");
       }
-    } catch (error) {
-      // Xử lý lỗi trong quá trình gọi API
-      console.error("Logout error", error);
-      toast.sendToast("Error", "Đăng xuất thất bại, vui lòng thử lại.");
     }
+
   };
 
 

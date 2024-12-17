@@ -1,7 +1,6 @@
-'use client'
-import { useState, useEffect } from "react";
+'use client';
+import { useState, useEffect, Suspense } from "react";
 import { useToast } from "@/hooks/useToast";
-import { Select, MenuItem } from "@mui/material";
 import { API_URL } from "@/config/url";
 import React, { FormEvent } from 'react';
 import {
@@ -33,8 +32,6 @@ interface IProduct {
 
 const Checkout: React.FC = () => {
     const [isAddressValid, setIsAddressValid] = useState(true);
-    const searchParams = useSearchParams();
-    const router = useRouter();
     const [addressId, setAddressId] = useState<string>(""); // Lưu id địa chỉ
     const [paymentMethod, setPaymentMethod] = useState("cash");
     const [products, setProducts] = useState<IProduct[]>([]);
@@ -44,6 +41,7 @@ const Checkout: React.FC = () => {
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
     const [orderLoading, setOrderLoading] = useState(false); // Trạng thái loading khi đặt hàng
     const toast = useToast();
+    const router = useRouter();
 
     // Hàm kiểm tra tính hợp lệ của địa chỉ
     const handleAddressValidation = (isValid: boolean) => {
@@ -55,8 +53,7 @@ const Checkout: React.FC = () => {
     };
 
     const fetchCart = async () => {
-        // Đảm bảo rằng chỉ gọi localStorage khi chạy trên client
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
             const token = localStorage.getItem("accessToken");
             try {
                 const response = await fetch(`${API_URL}/api/cart/show-cart`, {
@@ -84,8 +81,7 @@ const Checkout: React.FC = () => {
     };
 
     const handlePaymentVNPay = async () => {
-        // Đảm bảo rằng chỉ gọi localStorage khi chạy trên client
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
             const token = localStorage.getItem("accessToken");
             setOrderLoading(true);
             const orderData = {
@@ -127,7 +123,7 @@ const Checkout: React.FC = () => {
     };
 
     const createOrder = async () => {
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
             const token = localStorage.getItem("accessToken");
             setOrderLoading(true);
             try {
@@ -176,82 +172,84 @@ const Checkout: React.FC = () => {
     };
 
     return (
-        <Box sx={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-            <Typography variant="h4" sx={{ marginBottom: "20px", fontWeight: "bold" }}>
-                Checkout
-            </Typography>
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
-                    <AddressSelection
-                        selectedAddressId={addressId}
-                        setSelectedAddressId={setAddressId}
-                        isAddressValid={isAddressValid}
-                        setIsAddressValid={setIsAddressValid}
-                    />
-                    <Paper sx={{ padding: "20px", marginTop: "20px" }}>
-                        <Typography variant="h6" sx={{ marginBottom: "10px", fontWeight: "bold" }}>
-                            Payment Method
-                        </Typography>
-                        <RadioGroup value={paymentMethod} onChange={handlePaymentChange}>
-                            <FormControlLabel value="creditCard" control={<Radio />} label="Credit/Debit Card" />
-                            <FormControlLabel value="vnpay" control={<Radio />} label="VNPAY" />
-                            <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
-                            <FormControlLabel value="cash" control={<Radio />} label="Cash on Delivery (COD)" />
-                        </RadioGroup>
-                    </Paper>
+        <Suspense fallback={<div>Loading...</div>}>
+            <Box sx={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+                <Typography variant="h4" sx={{ marginBottom: "20px", fontWeight: "bold" }}>
+                    Checkout
+                </Typography>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={8}>
+                        <AddressSelection
+                            selectedAddressId={addressId}
+                            setSelectedAddressId={setAddressId}
+                            isAddressValid={isAddressValid}
+                            setIsAddressValid={setIsAddressValid}
+                        />
+                        <Paper sx={{ padding: "20px", marginTop: "20px" }}>
+                            <Typography variant="h6" sx={{ marginBottom: "10px", fontWeight: "bold" }}>
+                                Payment Method
+                            </Typography>
+                            <RadioGroup value={paymentMethod} onChange={handlePaymentChange}>
+                                <FormControlLabel value="creditCard" control={<Radio />} label="Credit/Debit Card" />
+                                <FormControlLabel value="vnpay" control={<Radio />} label="VNPAY" />
+                                <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
+                                <FormControlLabel value="cash" control={<Radio />} label="Cash on Delivery (COD)" />
+                            </RadioGroup>
+                        </Paper>
+                    </Grid>
+
+                    <Grid item xs={12} md={4}>
+                        <Paper sx={{ padding: "20px" }}>
+                            <Typography variant="h6" sx={{ marginBottom: "10px", fontWeight: "bold" }}>
+                                Order Summary
+                            </Typography>
+                            <Divider sx={{ marginBottom: "10px" }} />
+                            {loading ? (
+                                <Typography>Loading...</Typography>
+                            ) : error ? (
+                                <Typography>Error: {error}</Typography>
+                            ) : products.length > 0 ? (
+                                <>
+                                    {products.map((product) => (
+                                        <Box display="flex" justifyContent="space-between" key={product.id} sx={{ marginBottom: "10px" }}>
+                                            <Typography>{product.title} (x{product.quantity})</Typography>
+                                            <Typography>{(product.price * product.quantity).toLocaleString()} VND</Typography>
+                                        </Box>
+                                    ))}
+                                    <Divider sx={{ marginBottom: "10px" }} />
+                                    <Typography variant="h6">Total: {totalPrice.toLocaleString()} VND</Typography>
+                                </>
+                            ) : (
+                                <Typography>Cart is empty</Typography>
+                            )}
+                            <Button disabled={!isAddressValid}
+                                variant="contained"
+                                color="primary"
+                                fullWidth
+                                sx={{ marginTop: "20px" }}
+                                onClick={handleOpenConfirmDialog}
+                            >
+                                {orderLoading ? <CircularProgress size={24} color="inherit" /> : "Đặt hàng"}
+                            </Button>
+                        </Paper>
+                    </Grid>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
-                    <Paper sx={{ padding: "20px" }}>
-                        <Typography variant="h6" sx={{ marginBottom: "10px", fontWeight: "bold" }}>
-                            Order Summary
-                        </Typography>
-                        <Divider sx={{ marginBottom: "10px" }} />
-                        {loading ? (
-                            <Typography>Loading...</Typography>
-                        ) : error ? (
-                            <Typography>Error: {error}</Typography>
-                        ) : products.length > 0 ? (
-                            <>
-                                {products.map((product) => (
-                                    <Box display="flex" justifyContent="space-between" key={product.id} sx={{ marginBottom: "10px" }}>
-                                        <Typography>{product.title} (x{product.quantity})</Typography>
-                                        <Typography>{(product.price * product.quantity).toLocaleString()} VND</Typography>
-                                    </Box>
-                                ))}
-                                <Divider sx={{ marginBottom: "10px" }} />
-                                <Typography variant="h6">Total: {totalPrice.toLocaleString()} VND</Typography>
-                            </>
-                        ) : (
-                            <Typography>Cart is empty</Typography>
-                        )}
-                        <Button disabled={!isAddressValid}
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            sx={{ marginTop: "20px" }}
-                            onClick={handleOpenConfirmDialog}
-                        >
+                <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+                    <DialogContent>
+                        <DialogContentText>Are you sure you want to place this order?</DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseConfirmDialog} color="primary">
+                            Huỷ
+                        </Button>
+                        <Button onClick={handleConfirmOrder} color="primary" autoFocus>
                             {orderLoading ? <CircularProgress size={24} color="inherit" /> : "Đặt hàng"}
                         </Button>
-                    </Paper>
-                </Grid>
-            </Grid>
-
-            <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
-                <DialogContent>
-                    <DialogContentText>Are you sure you want to place this order?</DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseConfirmDialog} color="primary">
-                        Huỷ
-                    </Button>
-                    <Button onClick={handleConfirmOrder} color="primary" autoFocus>
-                        {orderLoading ? <CircularProgress size={24} color="inherit" /> : "Đặt hàng"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+                    </DialogActions>
+                </Dialog>
+            </Box>
+        </Suspense>
     );
 };
 

@@ -1,7 +1,12 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import { Grid, Card, CardContent, CardMedia, Typography, Button } from "@mui/material";
-const token = localStorage.getItem("accessToken");
+
+let token: string | null = null; // Khai báo rõ kiểu dữ liệu là string hoặc null
+
+if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+    token = localStorage.getItem("accessToken");
+}
 // Define interfaces for the response data
 import { API_URL } from "@/config/url";
 interface Address {
