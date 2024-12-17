@@ -1,5 +1,3 @@
-import { withNextVideo } from "next-video/process";
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: false, // Disable React's strict mode
@@ -20,4 +18,5 @@ const nextConfig = {
     },
 };
 
-export default withNextVideo(nextConfig);
+// Sử dụng CommonJS (module.exports thay vì export default)
+module.exports = nextConfig;
