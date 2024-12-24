@@ -1,31 +1,18 @@
-"use client"
-import HeroSection from "@/components/organisms/Hero";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+'use client'; // Đánh dấu đây là Client Component
 
-import { redirect } from "next/navigation";
-
-import {useEffect, useLayoutEffect} from "react";
-import { useRouter } from "next/navigation";
-import HomePage from "@/app/(main)/home/page";
+import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation'; // Import usePathname và useRouter từ next/navigation
 
 export default function Home() {
     const router = useRouter();
+    const pathname = usePathname(); // Sử dụng usePathname để lấy pathname
 
-    useLayoutEffect(() => {
-        // Kiểm tra nếu accessToken tồn tại trong localStorage
-        const accessToken = localStorage.getItem("accessToken");
-
-        if (accessToken) {
-            // Nếu tồn tại, redirect đến "/home"
-            router.push("/home");
-        } else {
-            // Nếu không, redirect đến "/login"
-            router.push("/login");
+    useEffect(() => {
+        // Điều hướng đến trang /login nếu hiện tại là trang chủ "/"
+        if (pathname === '/') {
+            router.push('/login');
         }
-    }, [router]);
+    }, [pathname, router]);
 
-    return (
-        <HomePage/>
-    );
+    // return <div>Home Page</div>;
 }
