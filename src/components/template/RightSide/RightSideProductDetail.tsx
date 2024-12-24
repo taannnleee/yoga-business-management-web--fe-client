@@ -7,25 +7,36 @@ import { useToast } from "@/hooks/useToast";
 import { useDispatch } from "react-redux";
 import { API_URL } from "@/config/url";
 
-// Define the correct types for variants
 interface Variant {
-    [key: string]: {
-        value: string;
-        image: string;
-    };
+    value: string;
+    image: string;
+}
+
+interface Product {
+    id: string;
+    title: string;
+    averageRating: number;
+    sold: number;
+    code: string;
+    brand: string;
+    price: number;
+    variants: Record<string, Record<string, string>>; // Đảm bảo khai báo đúng kiểu cho variants
 }
 
 interface RightSideProps {
-    product: any;
+    product: Product;
     quantity: number;
-    setQuantity: (quantity: React.SetStateAction<any>) => void;
-    handleAddToCart?: () => void;
-    currentVariant: Variant;
+    setQuantity: (quantity: React.SetStateAction<number>) => void;
+    currentVariant: any;
     handleVariantSelect: (variantType: string, value: string, image: string) => void;
 }
 
 export const RightSideProductDetail: React.FC<RightSideProps> = ({
-    product, quantity, setQuantity, currentVariant, handleVariantSelect
+    product,
+    quantity,
+    setQuantity,
+    currentVariant,
+    handleVariantSelect,
 }) => {
     const [loading, setLoading] = useState(false);
     const dispatch = useDispatch();
@@ -63,6 +74,11 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
         }
     };
 
+    const handleBuyNow = async () => {
+        await handleAddToCart();
+        // Logic để thực hiện hành động "Mua ngay" (ví dụ: chuyển đến trang thanh toán)
+    };
+
     return (
         <div className="space-y-4">
             <Typography variant="h6" className="font-bold text-ellipsis text-black">
@@ -72,7 +88,6 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
             {/* Ratings and Reviews */}
             <div className="flex items-center gap-2">
                 <Typography variant="subtitle1" className="text-gray-600 flex justify-between items-center space-x-4">
-                    {/* Rating */}
                     <div className="flex items-center space-x-2">
                         <span className="font-bold text-black">
                             {product?.averageRating?.toFixed(1)}
@@ -88,10 +103,7 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                                 }
                             })}
                         </span>
-                        <span className="text-gray-500">|</span>
                     </div>
-
-                    {/* Separator and Views/Sales */}
                     <div className="flex items-center space-x-2">
                         <span className="text-black font-semibold">100 Đánh giá/Bình luận</span>
                         <span className="text-gray-500">|</span>
@@ -112,48 +124,52 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
 
             <div>
                 {product?.variants &&
-                    Object.entries(product.variants).map(([variantType, variantValues]) => (
-                        <div key={variantType} className={"my-4"}>
-                            <Typography variant="subtitle1" className="text-black font-bold">
-                                {variantType.charAt(0).toUpperCase() + variantType.slice(1)}
-                            </Typography>
-                            <div className="flex items-center space-x-4">
-                                {Object.entries(variantValues as { [key: string]: string }).map(([value, image], index) => (
-                                    <div
-                                        key={index}
-                                        className={"flex items-center justify-evenly mr-4"}
-                                        onClick={() => handleVariantSelect(variantType, value, image as string)} // Explicitly cast image to string
-                                    >
-                                        <Typography className="cursor-pointer">
-                                            <div className={"flex items-center justify-start space-x-2"}>
-                                                {/* Check if the variant is color and display image */}
-                                                {variantType === 'color' ? (
-                                                    <>
-                                                        <Image
-                                                            src={image || '/path/to/fallback/image.jpg'}
-                                                            alt={`${value} color`}
-                                                            width={40}
-                                                            height={40}
-                                                            className={`rounded-md cursor-pointer ${image === currentVariant.color?.image ? 'border-2 border-red-500' : ''}`}
-                                                        />
-                                                        <Typography variant="caption" className="text-center mt-1 mr-8">
-                                                            {value}
-                                                        </Typography>
-                                                    </>
-                                                ) : (
-                                                    <div
-                                                        className={`flex items-center justify-center w-11 h-11 border border-gray-300 rounded-md cursor-pointer ${value === currentVariant[variantType]?.value ? 'border-2 border-red-800' : ''}`}
-                                                    >
-                                                        <Typography className="text-center">{value}</Typography>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </Typography>
-                                    </div>
-                                ))}
+                    Object.entries(product.variants).map(([variantType, variantValues]) => {
+                        return (
+                            <div key={variantType} className={"my-4"}>
+                                <Typography variant="subtitle1" className="text-black font-bold">
+                                    {variantType.charAt(0).toUpperCase() + variantType.slice(1)}
+                                </Typography>
+                                <div className="flex items-center space-x-4">
+                                    {Object.entries(variantValues).map(([value, image], index) => (
+                                        <div
+                                            key={index}
+                                            className={"flex items-center justify-evenly mr-4"}
+                                            onClick={() => {
+                                                const variantImage = image || '/path/to/fallback/image.jpg'; // Fallback for image
+                                                handleVariantSelect(variantType, value, variantImage);
+                                            }}
+                                        >
+                                            <Typography className="cursor-pointer">
+                                                <div className={"flex items-center justify-start space-x-2"}>
+                                                    {variantType === 'color' ? (
+                                                        <>
+                                                            <Image
+                                                                src={image || '/path/to/fallback/image.jpg'}
+                                                                alt={`${value} color`}
+                                                                width={40}
+                                                                height={40}
+                                                                className={`rounded-md cursor-pointer ${image === currentVariant.color?.image ? 'border-2 border-red-500' : ''}`}
+                                                            />
+                                                            <Typography variant="caption" className="text-center mt-1 mr-8">
+                                                                {value}
+                                                            </Typography>
+                                                        </>
+                                                    ) : (
+                                                        <div
+                                                            className={`flex items-center justify-center w-11 h-11 border border-gray-300 rounded-md cursor-pointer ${value === currentVariant[variantType]?.value ? 'border-2 border-red-800' : ''}`}
+                                                        >
+                                                            <Typography className="text-center">{value}</Typography>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </Typography>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
             </div>
 
             <div className="flex items-center space-x-4 mt-4">
@@ -162,7 +178,7 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                     aria-label="Quantity"
                     placeholder="Nhập số lượng…"
                     value={quantity}
-                    onChange={(event, val) => setQuantity(val)}
+                //   onChange={(event, val) => setQuantity(val)}
                 />
             </div>
 
@@ -182,6 +198,7 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                 >
                     {loading ? <CircularProgress size={24} color="inherit" /> : 'THÊM VÀO GIỎ'}
                 </Button>
+
                 <Button
                     sx={{
                         width: '230px',
@@ -193,7 +210,7 @@ export const RightSideProductDetail: React.FC<RightSideProps> = ({
                             backgroundColor: '#78B3CE',
                         },
                     }}
-                    onClick={handleAddToCart}
+                    onClick={handleBuyNow}
                 >
                     MUA NGAY
                 </Button>

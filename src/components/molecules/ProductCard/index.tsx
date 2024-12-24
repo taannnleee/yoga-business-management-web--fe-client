@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button, IconButton, CircularProgress, Typography, Dialog } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,33 +10,35 @@ import { useToast } from "@/hooks/useToast";
 import { useDispatch } from "react-redux";
 import { API_URL } from "@/config/url";
 
-// Interface để xác định kiểu cho sản phẩm và biến thể
+// Định nghĩa kiểu cho variant và product
 interface Variant {
     id: string;
     name: string;
+    price: number;
+    // Các thuộc tính khác của variant (nếu có)
 }
 
 interface Product {
     id: string;
     title: string;
-    price: number;
     imagePath: string;
+    price: number;
     averageRating: number;
+    // Các thuộc tính khác của product
 }
 
-export const ProductCard = ({ product, loading }: { product: Product; loading: boolean }) => {
+// Component ProductCard nhận các props: product, loading, handleAddToCart, và renderStars
+export const ProductCard = ({ product, loading, renderStars }: { product: Product; loading: boolean; renderStars: (rating: number) => JSX.Element }) => {
     const [open, setOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [quantity, setQuantity] = useState(1);
-    const [currentVariant, setCurrentVariant] = useState<Variant | null>(null); // Sửa thành kiểu rõ ràng
-    const [isProductLoading, setProductLoading] = useState(false); // For fetching product details
+    const [currentVariant, setCurrentVariant] = useState<Variant | null>(null);
     const router = useRouter();
     const toast = useToast();
     const dispatch = useDispatch();
 
     const handleOpenModal = async (product: Product) => {
         setOpen(true);
-        setProductLoading(true); // Set loading to true when fetching product details
         try {
             const token = localStorage.getItem("accessToken"); // Lấy accessToken từ localStorage
             if (!token) {
@@ -57,9 +59,6 @@ export const ProductCard = ({ product, loading }: { product: Product; loading: b
             }
         } catch (error) {
             console.error("Error fetching product details:", error);
-            toast.sendToast("Error", "Unable to fetch product details");
-        } finally {
-            setProductLoading(false); // Set loading to false after data fetch
         }
     };
 
@@ -74,10 +73,15 @@ export const ProductCard = ({ product, loading }: { product: Product; loading: b
     };
 
     const handleAddToCart = async () => {
+        if (!selectedProduct || !currentVariant) {
+            toast.sendToast("Lỗi", "Vui lòng chọn variant và sản phẩm");
+            return;
+        }
+
         try {
             const token = localStorage.getItem("accessToken");
             if (!token) {
-                console.error("Access token is missing.");
+                toast.sendToast("Lỗi", "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
                 return;
             }
 
@@ -88,9 +92,9 @@ export const ProductCard = ({ product, loading }: { product: Product; loading: b
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    productId: selectedProduct?.id?.toString(),
-                    quantity,
-                    currentVariant,
+                    productId: selectedProduct?.id.toString(),
+                    quantity: quantity,
+                    currentVariant: currentVariant,
                 }),
             });
 
@@ -105,7 +109,6 @@ export const ProductCard = ({ product, loading }: { product: Product; loading: b
             dispatch(incrementTotalItems());
         } catch (err: any) {
             console.error("Error adding product to cart:", err.message);
-            toast.sendToast("Error", "Unable to add product to cart");
         }
     };
 
@@ -138,9 +141,9 @@ export const ProductCard = ({ product, loading }: { product: Product; loading: b
                             },
                         },
                     }}
-                    disabled={loading || isProductLoading} // Disable when loading or fetching product details
+                    disabled={loading}
                 >
-                    {isProductLoading ? (
+                    {loading ? (
                         <CircularProgress
                             size={40}
                             sx={{
@@ -165,7 +168,6 @@ export const ProductCard = ({ product, loading }: { product: Product; loading: b
                         },
                     }}
                     onClick={() => router.push(`/product-detail/${product.id}`)}
-                    disabled={loading || isProductLoading}
                 >
                     Xem chi tiết
                 </Button>
@@ -187,18 +189,19 @@ export const ProductCard = ({ product, loading }: { product: Product; loading: b
                 >
                     {product.title}
                 </Typography>
+                <div className="mt-1">{renderStars(product.averageRating)}</div>
                 <Typography variant="body2" className="text-gray-500 mt-1">
                     {product.price.toLocaleString()}₫
                 </Typography>
             </div>
             <Dialog open={open} onClose={handleCloseModal} maxWidth={"lg"}>
-                {/* <ProductDetailModal
+                <ProductDetailModal
                     selectedProduct={selectedProduct}
                     quantity={quantity}
                     setQuantity={setQuantity}
                     handleAddToCart={handleAddToCart}
                     handleVariantChange={handleVariantChange}
-                /> */}
+                />
             </Dialog>
         </div>
     );

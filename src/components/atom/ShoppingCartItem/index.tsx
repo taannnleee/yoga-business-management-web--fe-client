@@ -12,27 +12,28 @@ interface IProduct {
     price: number;
     variants: any;  // Thay đổi kiểu từ string sang any hoặc một kiểu phù hợp
     subCategory: string;
-    imagePath: string
+    imagePath?: string;
 }
 
 interface ICartItem {
     id: string;
-    quantity: string;
+    quantity: number;
     totalPrice: number;
     product: IProduct;
     currentVariant: string;
-    imagePath: string;
+    imagePath?: string;
 }
 interface IInputProps {
     cartItem: ICartItem;
-
+    onRemove: (productId: string) => void;
     fetchCart: () => void;
+    setLoadPrice: (b: boolean) => void;
 }
 
-const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
+const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, onRemove, fetchCart, setLoadPrice }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [quantity, setQuantity] = useState(Number(cartItem.quantity)); // Tổng số lượng hiện tại
+    const [quantity, setQuantity] = useState(cartItem.quantity); // Tổng số lượng hiện tại
     const [changedQuantity, setChangedQuantity] = useState(0); // Số lượng thay đổi
     const debouncedChangedQuantity = useDebounce(changedQuantity, 1000); // Debounce số lượng thay đổi
 
@@ -42,7 +43,7 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
                 console.log('Tăng số lượng sản phẩm:', cartItem.product.id, debouncedChangedQuantity);
                 setLoading(true);
                 setError(null);
-
+                setLoadPrice(true);
                 try {
                     const token = localStorage.getItem("accessToken");
                     const response = await fetch(`${API_URL}/api/cart/increase-to-cart`, {
@@ -71,12 +72,13 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
                     setLoading(false);
                     setChangedQuantity(0); // Reset số lượng thay đổi sau khi cập nhật
                     fetchCart();
+                    setLoadPrice(false);
                 }
             } else if (debouncedChangedQuantity < 0) { // Chỉ gọi API khi số lượng giảm
                 console.log('Giảm số lượng sản phẩm:', cartItem.product.id, debouncedChangedQuantity);
                 setLoading(true);
                 setError(null);
-
+                setLoadPrice(true);
                 try {
                     const token = localStorage.getItem("accessToken");
                     const response = await fetch(`${API_URL}/api/cart/subtract-from-cart-item`, {
@@ -102,7 +104,8 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
                 } finally {
                     setLoading(false);
                     setChangedQuantity(0); // Reset số lượng thay đổi sau khi cập nhật
-                    fetchCart()
+                    fetchCart();
+                    setLoadPrice(false);
                 }
             }
         };
@@ -111,12 +114,14 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
     }, [debouncedChangedQuantity, cartItem.product.id]);
 
     const handleIncrease = () => {
+        setLoadPrice(true);
         setQuantity((prevQuantity) => prevQuantity + 1); // Tăng tổng số lượng
         setChangedQuantity((prevChanged) => prevChanged + 1); // Tăng số lượng thay đổi
     };
 
     const handleDecrease = () => {
-        if (Number(quantity) > 1) {
+        if (quantity > 1) {
+            setLoadPrice(true);
             setQuantity((prevQuantity) => prevQuantity - 1); // Giảm tổng số lượng
             setChangedQuantity((prevChanged) => prevChanged - 1); // Giảm số lượng thay đổi
         }
@@ -147,7 +152,8 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
             const data = await response.json();
             console.log(data);
 
-
+            // Gọi hàm onRemove để cập nhật lại giỏ hàng
+            onRemove(cartItem.product.id);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -196,7 +202,7 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
                 {/* Tiêu đề sản phẩm */}
                 <Grid item xs={2}>
                     <Typography sx={{ fontWeight: 'bold' }}>{cartItem.product.title}</Typography>
-                    <Typography variant="body2" color="textSecondary">5.4-inch display</Typography>
+                    {/* <Typography variant="body2" color="textSecondary">5.4-inch display</Typography> */}
                 </Grid>
 
                 {/* Giá sản phẩm */}
@@ -231,7 +237,7 @@ const ShoppingCartItem: React.FC<IInputProps> = ({ cartItem, fetchCart }) => {
                 {/* Tổng tiền */}
                 <Grid item xs={2}>
                     <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                        {((Number(quantity) || 0) * (cartItem?.product?.price ?? 0)).toLocaleString('vi-VN')} đ
+                        {(quantity * cartItem.product.price).toLocaleString('vi-VN')} đ {/* Định dạng số tiền với dấu '.' cách 3 số */}
                     </Typography>
                 </Grid>
 

@@ -1,20 +1,14 @@
-'use client'
+"use client";
 import React, { useState, useEffect } from "react";
 import { LeftSideGetAllProduct } from "@/components/template/LeftSide/LeftSideGetAllProduct";
-import { RightSideGetAllProduct } from "@/components/template/RightSide/RightSideGetAllProduct";
 import { LeftSideGetAllProductSkeleton } from "@/components/template/LeftSide/LeftSideGetAllProductSkeleton";
-import { useParams } from 'next/navigation';
-
+import { useParams } from 'next/navigation'
 const ProductPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(4); // Default items per page
     const [totalItems, setTotalItems] = useState(1); // Total number of items
-
-    // Ensure searchTerm is always a string
-    const { keyword } = useParams();
-    const [searchTerm, setSearchTerm] = useState<string>(Array.isArray(keyword) ? keyword[0] : keyword || '');
-
+    const [searchTerm, setSearchTerm] = useState(useParams().keyword || '');
     // Simulating data fetching and setting initial states
     useEffect(() => {
         const fetchData = async () => {
@@ -35,13 +29,13 @@ const ProductPage: React.FC = () => {
                     {loading ? (
                         <LeftSideGetAllProductSkeleton />
                     ) : (
-                        <LeftSideGetAllProduct setPage={setPage} setTotalItems={setTotalItems} />
+                        <LeftSideGetAllProduct />
                     )}
                 </div>
 
                 {/* Right Side - Show Product Component */}
                 <div className="flex-grow">
-                    <RightSideGetAllProduct
+                    {/* <RightSideGetAllProduct
                         searchTerm={searchTerm}
                         setSearchTerm={setSearchTerm}
                         setItemsPerPage={setItemsPerPage}
@@ -50,7 +44,7 @@ const ProductPage: React.FC = () => {
                         totalItems={totalItems}
                         setTotalItems={setTotalItems}
                         setPage={setPage}
-                    />
+                    /> */}
                 </div>
             </div>
         </div>

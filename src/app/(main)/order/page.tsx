@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState, useEffect } from "react";
 import { API_URL } from "@/config/url";
 import {
@@ -20,7 +20,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import StarRating from "@/components/molecules/StarRating";
 import { useToast } from "@/hooks/useToast";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 
 // Các interface dữ liệu
 interface OrderItem {
@@ -46,7 +46,7 @@ interface Order {
 }
 
 interface Product {
-    id: string;
+    id: number;
     imagePath: string;
 }
 
@@ -305,14 +305,14 @@ const OrderPage: React.FC = () => {
                                                     </>
                                                 )}
 
-                                                {selectedTab === 3 && orderItem?.comment && (
+                                                {/* {selectedTab === 3 && orderItem?.comment && (
                                                     <>
                                                         <Typography variant="h6" sx={{ mt: 2 }}>
                                                             {orderItem.comment.content}
                                                         </Typography>
-                                                        {/* <StarRating rating={orderItem.comment.ratePoint} /> */}
+                                                        <StarRating rating={orderItem.comment.ratePoint} />
                                                     </>
-                                                )}
+                                                )} */}
                                             </div>
                                         ))}
                                     </AccordionDetails>

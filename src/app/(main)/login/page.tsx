@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import Button from "@/components/atom/Button";
 import Input from "@/components/atom/Input";
@@ -53,7 +53,7 @@ const LoginPage: React.FC<ILoginPageProps> = (props) => {
         router.replace("/home");
       } else if (result.status === 1013) {
         // Tài khoản chưa được kích hoạt, gọi API để lấy email
-        toast.sendToast("Error", "Tài khoản chưa được kích hoạt");
+        toast.sendToast("Error", "Tài khoản chưa được kích hoạt", "error");
 
         // Gọi API để lấy email
         const emailResponse = await fetch(
@@ -88,16 +88,16 @@ const LoginPage: React.FC<ILoginPageProps> = (props) => {
             // Nếu gửi OTP thành công, chuyển tới trang verify-account với email
             router.replace(`/verify-account?email=${email}`);
           } else {
-            toast.sendToast("Error", "Failed to send OTP");
+            toast.sendToast("Error", "Failed to send OTP", "error");
           }
         } else {
-          toast.sendToast("Error", "Failed to retrieve email");
+          toast.sendToast("Error", "Failed to retrieve email", "error");
         }
 
         setLoading(false);
       } else {
         setLoading(false);
-        toast.sendToast("Error", "Login failed", result.message);
+        toast.sendToast("Error", "Login failed", "error");
       }
     } catch (error: any) {
       setLoading(false);
@@ -108,7 +108,7 @@ const LoginPage: React.FC<ILoginPageProps> = (props) => {
       );
     }
   };
-
+  
   return (
     <div className="w-full h-auto flex justify-center items-center bg-white">
       <Box

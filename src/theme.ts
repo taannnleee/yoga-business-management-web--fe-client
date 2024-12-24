@@ -1,5 +1,4 @@
-'use client'
-
+"use client";
 import { Lexend } from "next/font/google";
 import { createTheme } from "@mui/material/styles";
 

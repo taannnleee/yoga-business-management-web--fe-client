@@ -6,34 +6,42 @@ import MyListAddressModal from "@/app/(main)/checkout/MyListAddressModal";
 import { API_URL } from "@/config/url";
 interface Address {
     id: string;
-    fullName: string;
-    phone: string;
-    additionalInfo: string;
+    phoneNumberDelivery: string;
+    nameDelivery: string;
+    status?: boolean;
+
+    houseNumber: string;
     street: string;
     district: string;
     city: string;
-    isDefault: boolean;
+
 }
 
-interface AddressSelectionProps {
+let accessToken: string | null = null; // Khai báo rõ kiểu dữ liệu là string hoặc null
 
-    selectedAddressId: string;
+
+
+interface AddressSelectionProps {
+    loading: boolean;
+    addressId: string;
     setSelectedAddressId: React.Dispatch<React.SetStateAction<string>>;
-    isAddressValid: boolean;
-    setIsAddressValid: React.Dispatch<React.SetStateAction<boolean>>;
+
+    setIsAddressValid: (isValid: boolean) => void;
+
+
 
 }
 
 const AddressSelection: React.FC<AddressSelectionProps> = ({
-
-    selectedAddressId,
+    loading,
+    addressId,
     setSelectedAddressId,
-    isAddressValid,
     setIsAddressValid
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isListModalOpen, setIsListModalOpen] = useState(false);
-    const [shippingInfo, setShippingInfoState] = useState<any>(null);
+    const [shippingInfo, setShippingInfoState] = useState<Address | null>(null);
+
 
 
     const validateAddress = (address: Address) => {
@@ -42,12 +50,14 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
             address.street && address.street !== "" &&
             address.district && address.district !== "" &&
             address.city && address.city !== "" &&
-            address.fullName && address.fullName !== "" &&
-            address.phone && address.phone !== ""
+            address.nameDelivery && address.nameDelivery !== "" &&
+            address.phoneNumberDelivery && address.phoneNumberDelivery !== ""
         ) {
-            setIsAddressValid(true);  // Cập nhật trực tiếp trạng thái là hợp lệ
+            setIsAddressValid(true); // All fields are valid
+
         } else {
-            setIsAddressValid(false);  // Cập nhật trạng thái là không hợp lệ
+            setIsAddressValid(false); // One or more fields are empty
+
         }
     };
 
@@ -65,19 +75,16 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
     const closeModal = () => setIsModalOpen(false);
 
     const handleAddressSelect = (address: Address) => {
-        console.log("tan1111111")
-        console.log(address.id)
+
         setShippingInfoState({
-            fullName: address.fullName,
-            phone: address.phone,
-            address: {
-                id: address.id,
-                houseNumber: address.street,
-                street: address.street,
-                district: address.district,
-                city: address.city,
-                additionalInfo: address.additionalInfo
-            }
+            id: address.id,
+            houseNumber: address.houseNumber,
+            street: address.street,
+            district: address.district,
+            city: address.city,
+            nameDelivery: address.nameDelivery || "",  // Gán giá trị mặc định nếu cần
+            phoneNumberDelivery: address.phoneNumberDelivery || "",  // Gán giá trị mặc định nếu cần
+            status: address.status || false,  // Gán giá trị mặc định nếu cần
         });
 
         setSelectedAddressId(address.id);
@@ -85,12 +92,12 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
         setIsListModalOpen(false);
         validateAddress(address);
     };
+    const fetchDefaultAddress = async () => {
+        try {
 
-    // Fetch the default address when component mounts
-    useEffect(() => {
-        const fetchDefaultAddress = async () => {
-            try {
-                const accessToken = localStorage.getItem("accessToken"); // Get token from localStorage
+            if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+                accessToken = localStorage.getItem("accessToken");
+                // Get token from localStorage
                 if (!accessToken) {
                     console.error("No access token found.");
                     return;
@@ -107,35 +114,36 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                 const data = await response.json();
                 if (data.status === 200) {
                     const { id, houseNumber, street, district, city, nameDelivery, phoneNumberDelivery } = data.data;
-                    const address = {
+
+                    const address: Address = {
                         id,
                         houseNumber,
                         street,
                         district,
                         city,
-                        additionalInfo: ""
+                        nameDelivery,
+                        phoneNumberDelivery
                     };
 
                     // Set shipping info state
-                    setShippingInfoState({
-                        fullName: nameDelivery,
-                        phone: phoneNumberDelivery,
-                        address: address
-                    });
+                    setShippingInfoState(address);
 
                     // Set selected address ID
                     setSelectedAddressId(id);
 
                     // Validate the address after setting the shipping info
-                    // validateAddress(address);
+                    validateAddress(address);
                 } else {
                     console.error("Failed to fetch address:", data.message);
                 }
-            } catch (error) {
-                console.error("Error fetching address:", error);
             }
-        };
 
+        } catch (error) {
+            console.error("Error fetching address:", error);
+        }
+    };
+    // Fetch the default address when component mounts
+    useEffect(() => {
         fetchDefaultAddress();
     }, []);
 
@@ -146,7 +154,7 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                 <h2 className="text-xl font-bold mb-4 mx-2 text-orange-600">Địa chỉ nhận hàng</h2>
             </div>
 
-            {!shippingInfo ? (
+            {loading || !shippingInfo ? (
                 <div className="space-y-2">
                     <Skeleton variant="text" width="60%" height={30} />
                     <Skeleton variant="text" width="80%" height={20} />
@@ -156,16 +164,16 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                 <div>
                     <div className="flex items-center justify-between w-full">
                         <p className="font-bold">
-                            Họ và tên: {shippingInfo.fullName} - Số điện thoại  {shippingInfo.phone}
+                            Họ và tên: {shippingInfo.nameDelivery} - Số điện thoại  {shippingInfo.phoneNumberDelivery}
                         </p>
-                        {shippingInfo.address.houseNumber && (
+                        {shippingInfo.houseNumber && (
                             <p className="border border-solid border-[#ee4d2d] rounded-[1px] text-[#ee4d2d] text-[10px] leading-[12px] mt-0 mb-0 ml-[15px] px-[5px] py-[2px] capitalize text-sm font-semibold text-right">
                                 Mặc định
                             </p>
                         )}
                     </div>
                     <p>
-                        Tỉnh: {shippingInfo.address.city}, Huyện: {shippingInfo.address.district}, Đường: {shippingInfo.address.street}
+                        Tỉnh: {shippingInfo.city}, Huyện: {shippingInfo.district}, Đường: {shippingInfo.street}, Số nhà: {shippingInfo.houseNumber}
 
                     </p>
                 </div>
@@ -179,21 +187,21 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
                 Chọn địa chỉ
             </button>
 
-            {/* {isModalOpen && <AddAddressModal
+            {isModalOpen && <AddAddressModal
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
-                addNewAddress={addNewAddress}
+                fetchAddresses={fetchDefaultAddress}
             />}
 
             {isListModalOpen && (
                 <MyListAddressModal
-                    addresses={addresses}
                     isModalOpen={isListModalOpen}
                     closeModal={() => setIsListModalOpen(false)}
                     onAddressSelect={handleAddressSelect}
                     openAddAddressModal={openAddModal}
+                    fetchDefaultAddress={fetchDefaultAddress}
                 />
-            )} */}
+            )}
         </div>
     );
 };

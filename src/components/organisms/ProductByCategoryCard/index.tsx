@@ -170,9 +170,9 @@ export const ProductByCategoryCard: React.FC<ProductByCategoryCardProps> = ({ im
 
 
                         </Box>
-                        <Button variant="contained" color="primary" className="ml-auto" onClick={() => handleViewAllProduct(category)}>
+                        {/* <Button variant="contained" color="primary" className="ml-auto" onClick={() => handleViewAllProduct(category)}>
                             Xem tất cả
-                        </Button>
+                        </Button> */}
                     </Box>
 
                     <Divider className="my-2" />

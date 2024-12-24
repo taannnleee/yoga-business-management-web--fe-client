@@ -1,10 +1,9 @@
-'use client'
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/solid";
 import { Popover, TextField } from "@mui/material";
-import { API_URL } from "@/config/url";
+import {API_URL} from "@/config/url";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 
 const FulfillmentManagement: React.FC = () => {
     const [openPopup, setOpenPopup] = useState<boolean>(false);
@@ -60,7 +59,10 @@ const FulfillmentManagement: React.FC = () => {
             setProducts([]);
         }
     }, [searchTerm]);
-
+    const navigateToProductDetail = (id: string) => {
+        router.push(`/product-detail/${id}`);
+        setOpenPopup(false);
+    }
     return (
         <>
             <button onClick={handleClick}>
@@ -126,6 +128,7 @@ const FulfillmentManagement: React.FC = () => {
                                     <div
                                         key={product.id}
                                         className="max-h-[90px] text-sm cursor-pointer flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-blue-500 hover:text-white transition-colors duration-300 shadow-md"
+                                        onClick={() => navigateToProductDetail(product.id)}
                                     >
                                         <Image
                                             src={product.imagePath}
@@ -138,7 +141,7 @@ const FulfillmentManagement: React.FC = () => {
                                             <h4 className="text-sm font-medium leading-tight line-clamp-1">{product.title}</h4>
                                             <p
                                                 className="text-xs mt-1 overflow-hidden text-ellipsis line-clamp-3"
-                                                dangerouslySetInnerHTML={{ __html: product.description }}
+                                                dangerouslySetInnerHTML={{__html: product.description}}
                                             ></p>
 
                                             {product.price && (

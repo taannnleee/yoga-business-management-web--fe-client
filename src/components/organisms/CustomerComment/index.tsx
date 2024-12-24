@@ -1,8 +1,7 @@
-'use client'
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import CommentCard from "@/components/molecules/CommentCard";
 import CommentInput from "@/components/atom/CommentInput";
 import { Divider } from "@mui/material";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
@@ -55,11 +54,11 @@ const CustomerComment: React.FC<IProductCommentsProps> = ({ productDetail, class
                 setListComments(data?.data.content || []); // Set the comments data
                 setTotalItems(data.data.totalElements);
             } else {
-                toast.sendToast("error", data?.message || "Lỗi khi tải bình luận"); // Error handling for unsuccessful response
+                toast.sendToast("error", data?.message || "Lỗi khi tải bình luận", "error"); // Error handling for unsuccessful response
             }
         } catch (error) {
             console.error("Error fetching comments:", error);
-            toast.sendToast("error", "Có lỗi xảy ra, vui lòng thử lại"); // Show generic error message to the user
+            toast.sendToast("error", "Có lỗi xảy ra, vui lòng thử lại", "error"); // Show generic error message to the user
         }
     };
     const onRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -104,9 +103,9 @@ const CustomerComment: React.FC<IProductCommentsProps> = ({ productDetail, class
             }
         } catch (error: any) {
             if (error?.message === "Failed to fetch comments" || error?.message === "Failed to post comment") {
-                toast.sendToast("error", "Có lỗi xảy ra, vui lòng thử lại");
+                toast.sendToast("Error", "Có lỗi xảy ra, vui lòng thử lại", "error");
             } else if (error?.response?.status === 401) {
-                toast.sendToast("error", "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+                toast.sendToast("Error", "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại", "error");
             } else {
                 console.error("Error posting comment:", error);
             }
@@ -126,16 +125,16 @@ const CustomerComment: React.FC<IProductCommentsProps> = ({ productDetail, class
                 <>
                     {listComments?.length > 0 ? (
                         <div className="mt-2 flex flex-col gap-y-2">
-                            {listComments.map((comment, index) => {
+                            {/* {listComments.map((comment, index) => {
                                 return (
                                     <CommentCard
                                         key={index}
-                                        // commentMode="view"
+                                        commentMode="view"
                                         comment={comment}
                                         productDetail={productDetail}
                                         onReplyingSuccess={getListComments}/>
                                 );
-                            })}
+                            })} */}
                             <BottomContent
                                 totalItems={totalItems}
                                 page={page}

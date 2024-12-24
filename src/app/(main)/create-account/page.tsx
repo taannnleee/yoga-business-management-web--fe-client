@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import Button from "@/components/atom/Button";
 import Input from "@/components/atom/Input";
@@ -64,7 +64,7 @@ const CreateAccountPage: React.FC<ICreateAccountPageProps> = (props) => {
             setLoading(false);
             toast.sendToast(
                 "Error",
-
+                "Register error",
                 "error"
             );
             console.error("Register error:", error);
@@ -121,14 +121,26 @@ const CreateAccountPage: React.FC<ICreateAccountPageProps> = (props) => {
                             name="firstName"
                             label="First Name"
                             placeholder="Enter your first name"
-                            rules={{ required: "First name is required" }}
+                            rules={{
+                                required: "First name is required",
+                                maxLength: {
+                                    value: 50,
+                                    message: "Field cannot be longer than 50 characters",
+                                }
+                            }}
                         />
                         <Input
                             control={control}
                             name="lastName"
                             label="Last Name"
                             placeholder="Enter your last name"
-                            rules={{ required: "Last name is required" }}
+                            rules={{
+                                required: "Last name is required",
+                                maxLength: {
+                                    value: 50,
+                                    message: "Field cannot be longer than 50 characters",
+                                }
+                            }}
                         />
                     </div>
 
@@ -137,21 +149,48 @@ const CreateAccountPage: React.FC<ICreateAccountPageProps> = (props) => {
                         control={control}
                         label="Username"
                         placeholder="Enter your username"
-                        rules={{ required: "Username is required" }}
+                        rules={{
+                            required: "Username is required",
+                            maxLength: {
+                                value: 50,
+                                message: "Field cannot be longer than 50 characters",
+                            }
+                        }}
                     />
                     <Input
                         name="email"
                         control={control}
                         label="Email"
                         placeholder="Enter your email address"
-                        rules={{ required: "Email is required" }}
+                        rules={{
+                            required: "Email is required",
+                            pattern: {
+                                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                                message: "Email is not in correct format",
+                            },
+                            maxLength: {
+                                value: 50,
+                                message: "Field cannot be longer than 50 characters",
+                            }
+                        }}
                     />
                     <Input
                         name="phoneNumber"
                         control={control}
                         label="Phone number"
                         placeholder="Enter your phone number"
-                        rules={{ required: "Phone number is required" }}
+                        rules={{
+                            required: "Phone number is required",
+                            pattern: {
+                                value: /^0[0-9]{9}$/,  // Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số
+                                message: "Phone number must be 10 digits and start with 0",
+                            },
+                            maxLength: {
+                                value: 50,
+                                message: "Field cannot be longer than 50 characters",
+                            }
+
+                        }}
                     />
                     <Input
                         control={control}
@@ -159,7 +198,17 @@ const CreateAccountPage: React.FC<ICreateAccountPageProps> = (props) => {
                         label="Password"
                         placeholder="Password"
                         mode="password"
-                        rules={{ required: "Password is required" }}
+                        rules={{
+                            required: "Password is required",
+                            pattern: {
+                                value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
+                                message: "Password must be at least 8 characters long, contain at least one number and one special character.",
+                            },
+                            maxLength: {
+                                value: 50,
+                                message: "Field cannot be longer than 50 characters",
+                            }
+                        }}
                     />
                     <Input
                         control={control}

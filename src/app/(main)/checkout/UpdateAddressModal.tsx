@@ -4,26 +4,35 @@ import { useToast } from "@/hooks/useToast";
 import { API_URL } from "@/config/url";
 interface Address {
     id: string;
-    fullName: string;
-    phone: string;
-    additionalInfo: string;
+    phoneNumberDelivery: string;
+    nameDelivery: string;
+    status?: boolean;
+
+    houseNumber: string;
     street: string;
     district: string;
     city: string;
-    isDefault: boolean;
 }
 
 interface UpdateAddressModalProps {
     isModalOpen: boolean;
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedAddress: Address;
+    fetchAddresses: () => Promise<void>;
+    fetchDefaultAddress: () => Promise<void>;
 }
 
+let token: string | null = null; // Khai báo rõ kiểu dữ liệu là string hoặc null
+
+
+
 const UpdateAddressModal: React.FC<UpdateAddressModalProps> = ({
-                                                                   isModalOpen,
-                                                                   setIsModalOpen,
-                                                                   selectedAddress,
-                                                               }) => {
+    isModalOpen,
+    setIsModalOpen,
+    selectedAddress,
+    fetchAddresses,
+    fetchDefaultAddress,
+}) => {
     const toast = useToast();
     const [formData, setFormData] = useState<Address>(selectedAddress);
     const [loading, setLoading] = useState(false);
@@ -41,47 +50,53 @@ const UpdateAddressModal: React.FC<UpdateAddressModalProps> = ({
     };
 
     const handleUpdateAddress = async () => {
-        setLoading(true); // Set loading to true at the start of the API call
-        const token = localStorage.getItem("accessToken");
+        if (typeof window !== "undefined" && typeof window.localStorage !== "undefined") {
+            token = localStorage.getItem("accessToken");
+            setLoading(true); // Set loading to true at the start of the API call
 
-        const updatedAddress = {
-            houseNumber: formData.additionalInfo,
-            street: formData.street,
-            district: formData.district,
-            city: formData.city,
-            nameDelivery: formData.fullName,
-            phoneNumberDelivery: formData.phone,
-            status: formData.isDefault ? "DEFAULT" : "NORMAL",
-        };
 
-        try {
-            const response = await fetch(`${API_URL}/api/address/update/${formData.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify(updatedAddress),
-            });
+            const updatedAddress = {
+                houseNumber: formData.houseNumber,
+                street: formData.street,
+                district: formData.district,
+                city: formData.city,
+                nameDelivery: formData.nameDelivery,
+                phoneNumberDelivery: formData.phoneNumberDelivery,
+                status: formData.status ? "DEFAULT" : "NORMAL",
+            };
 
-            if (response.ok) {
-                setIsModalOpen(false);
-                toast.sendToast("Success", "Cập nhật địa chỉ thành công");
-            } else {
-                toast.sendToast("Error", "Cập nhật địa chỉ thất bại");
+            try {
+                const response = await fetch(`${API_URL}/api/address/update/${formData.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(updatedAddress),
+                });
+
+                if (response.ok) {
+
+                    toast.sendToast("Success", "Cập nhật địa chỉ thành công");
+                    fetchDefaultAddress
+                    fetchAddresses();
+                    setIsModalOpen(false);
+                } else {
+                    toast.sendToast("Error", "Cập nhật địa chỉ thất bại", "error");
+                }
+            } catch (error) {
+                console.error("Error updating address", error);
+            } finally {
+                setLoading(false); // Set loading to false after the API call completes
             }
-        } catch (error) {
-            console.error("Error updating address", error);
-        } finally {
-            setLoading(false); // Set loading to false after the API call completes
         }
+
     };
 
     return (
         <div
-            className={`fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50 ${
-                isModalOpen ? "block" : "hidden"
-            }`}
+            className={`fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50 ${isModalOpen ? "block" : "hidden"
+                }`}
         >
             <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                 <h3 className="text-lg font-semibold mb-4">Cập nhật địa chỉ</h3>
@@ -89,22 +104,22 @@ const UpdateAddressModal: React.FC<UpdateAddressModalProps> = ({
                     <TextField
                         label="Họ tên"
                         fullWidth
-                        name="fullName"
-                        value={formData.fullName}
+                        name="nameDelivery"
+                        value={formData.nameDelivery}
                         onChange={handleChange}
                     />
                     <TextField
                         label="Số điện thoại"
                         fullWidth
-                        name="phone"
-                        value={formData.phone}
+                        name="phoneNumberDelivery"
+                        value={formData.phoneNumberDelivery}
                         onChange={handleChange}
                     />
                     <TextField
                         label="Số nhà"
                         fullWidth
-                        name="additionalInfo"
-                        value={formData.additionalInfo}
+                        name="houseNumber"
+                        value={formData.houseNumber}
                         onChange={handleChange}
                     />
                     <TextField

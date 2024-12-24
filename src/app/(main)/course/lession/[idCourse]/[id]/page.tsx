@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState, useEffect } from "react"; // Thêm useEffect để gọi API
 import CourseCard from "@/components/organisms/CourseCard";
 import { useParams, useRouter } from "next/navigation";
@@ -150,7 +150,7 @@ const LessionPage: React.FC<any> = () => {
                             >
                                 {/* Avatar */}
                                 <Image
-                                    src={course?.teacher.profilePicture || '/default-avatar.png'}  // Đảm bảo có ảnh mặc định nếu undefined
+                                    src={course?.teacher.profilePicture || '/default-image.jpg'}
                                     alt="Avatar"
                                     width={50}
                                     height={50}
@@ -233,7 +233,7 @@ const LessionPage: React.FC<any> = () => {
                                 {course?.sections.map((section) => (
                                     <div key={section.id} className="mb-4">
                                         <h2 className="text-xl font-bold">{section.title}</h2>
-                                        {/* {section.lectures.map((lecture) => (
+                                        {section.lectures.map((lecture) => (
                                             <LectureItem
                                                 courseId={course.id}
                                                 isChoosen={lecture.id === parseInt(lectureId as string)}
@@ -242,7 +242,7 @@ const LessionPage: React.FC<any> = () => {
                                                 title={lecture.title}
                                                 thumbnail={lecture.image}
                                             />
-                                        ))} */}
+                                        ))}
                                     </div>
                                 ))}
                             </div>

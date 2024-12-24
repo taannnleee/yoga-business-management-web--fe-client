@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { Box, Modal, Button } from "@mui/material";
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';

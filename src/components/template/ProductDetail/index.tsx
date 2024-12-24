@@ -13,7 +13,21 @@ interface IProductDetailTemplateProps {
 }
 
 const ProductDetailTemplate: React.FC<IProductDetailTemplateProps> = ({ product }) => {
-    const [currentVariant, setCurrentVariant] = useState<any>({});
+    const [currentVariant, setCurrentVariant] = useState(() => {
+        const initialVariant = {};
+        if (product?.variants) {
+            Object.entries(product.variants).forEach(([variantType, variantValues]) => {
+                // @ts-ignore
+                initialVariant[variantType] = {
+                    // @ts-ignore
+                    value: Object.keys(variantValues)[0] || "", // Lấy giá trị đầu tiên
+                    // @ts-ignore
+                    image: variantValues[Object.keys(variantValues)[0]] || "",
+                };
+            });
+        }
+        return initialVariant;
+    });
     const [selectedImage, setSelectedImage] = useState(product?.imagePath || "");
     const [quantity, setQuantity] = useState(1);
     const [showScrollButton, setShowScrollButton] = useState(false);

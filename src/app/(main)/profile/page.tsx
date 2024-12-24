@@ -18,9 +18,9 @@ import { API_URL } from "@/config/url";
 import { useToast } from "@/hooks/useToast";
 
 const AccountInfo: React.FC = () => {
+    const [phoneError, setPhoneError] = useState<string>('');
     const toast = useToast();
-    const [activeTab, setActiveTab] = useState<string>('accountInfo');
-
+    const [activeTab, setActiveTab] = useState<'accountInfo' | 'changePassword'>('accountInfo');
     const [profileData, setProfileData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -32,6 +32,11 @@ const AccountInfo: React.FC = () => {
         confirmNewPassword: '',
     });
 
+    const isPhoneValid = (phone: string) => {
+        // Kiểm tra số điện thoại có đúng định dạng (10 chữ số và bắt đầu bằng 0)
+        const phoneRegex = /^0\d{9}$/;
+        return phoneRegex.test(phone);
+    };
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -53,12 +58,30 @@ const AccountInfo: React.FC = () => {
     const handleChangePassword = async () => {
         const token = localStorage.getItem("accessToken");
         if (!token) {
-            toast.sendToast("Error", "Access token is missing.");
+            toast.sendToast("Error", "Access token is missing.", "error");
+            return;
+        }
+
+        // Kiểm tra nếu mật khẩu hiện tại và mật khẩu mới giống nhau
+        if (passwordForm.currentPassword === passwordForm.newPassword) {
+            toast.sendToast("Error", "New password cannot be the same as the current password.", "error");
             return;
         }
 
         if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
-            toast.sendToast("Error", "New password and confirm new password must match.");
+            toast.sendToast("Error", "New password and confirm new password must match.", "error");
+            return;
+        }
+
+        // Kiểm tra độ dài mật khẩu
+        if (passwordForm.newPassword.length > 50) {
+            toast.sendToast("Error", "Password cannot be longer than 50 characters.", "error");
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,50}$/;
+        if (!passwordRegex.test(passwordForm.newPassword)) {
+            toast.sendToast("Error", "Password must be at least 8 characters long and contain at least one letter, one number, and one special character.", "error");
 
             return;
         }
@@ -94,7 +117,7 @@ const AccountInfo: React.FC = () => {
             // Đưa người dùng trở lại trang đăng nhập (hoặc redirect)
             window.location.href = "/login"; // Thay đổi trang theo yêu cầu của bạn
         } catch (err: any) {
-            toast.sendToast("Error", "Pass word incorrect");
+            toast.sendToast("Error", "Pass word incorrect", "error");
         }
     };
 
@@ -134,7 +157,7 @@ const AccountInfo: React.FC = () => {
                     dateOfBirth: formattedDateOfBirth || '',
                 });
             } catch (err) {
-                toast.sendToast("Error", "Failed to load profile data.");
+                toast.sendToast("Error", "Failed to load profile data.", "error");
             } finally {
                 setLoading(false);
             }
@@ -174,7 +197,7 @@ const AccountInfo: React.FC = () => {
             return response.data.data.url;
         } catch (error) {
             console.error('Image upload failed', error);
-            toast.sendToast("Error", "Failed to upload image.");
+            toast.sendToast("Error", "Failed to upload image.", "error");
 
             return null;
         }
@@ -193,8 +216,15 @@ const AccountInfo: React.FC = () => {
     const handleUpdateProfile = async () => {
         const token = localStorage.getItem("accessToken");
         if (!token) {
-            toast.sendToast("Error", "Access token is missing.");
+            toast.sendToast("Error", "Access token is missing.", "error");
             return;
+        }
+        // Kiểm tra số điện thoại
+        if (!isPhoneValid(formData.phone)) {
+            setPhoneError("Phone number is invalid. It must be a 10-digit number.");
+            return;
+        } else {
+            setPhoneError(""); // Xóa lỗi nếu số điện thoại hợp lệ
         }
 
         try {
@@ -210,7 +240,7 @@ const AccountInfo: React.FC = () => {
 
             setIsProfileUpdated(true);
         } catch (err: any) {
-            toast.sendToast("Error", "Failed to update profile.");
+            toast.sendToast("Error", "Failed to update profile.", "error");
         }
     };
 
@@ -250,7 +280,7 @@ const AccountInfo: React.FC = () => {
                                 cursor: 'pointer',
                                 color: activeTab === item.value ? 'blue' : 'black',
                             }}
-                            onClick={() => setActiveTab(item.value)}
+                        // onClick={() => setActiveTab(item.value)}
                         >
                             <Typography variant="body1">{item.label}</Typography>
                         </li>
@@ -303,6 +333,9 @@ const AccountInfo: React.FC = () => {
                                 onChange={handleInputChange}
                                 variant="outlined"
                                 fullWidth
+                                InputProps={{
+                                    readOnly: true,  // Ngăn người dùng sửa email
+                                }}
                             />
                             <TextField
                                 label="Phone"
@@ -311,6 +344,8 @@ const AccountInfo: React.FC = () => {
                                 onChange={handleInputChange}
                                 variant="outlined"
                                 fullWidth
+                                error={!!phoneError}  // Hiển thị lỗi nếu có
+                                helperText={phoneError}  // Hiển thị thông báo lỗi
                             />
                         </Box>
 
@@ -324,6 +359,11 @@ const AccountInfo: React.FC = () => {
                                 onChange={handleInputChange}  // Handle input change to update formData
                                 InputLabelProps={{
                                     shrink: true,
+                                }}
+                                InputProps={{
+                                    inputProps: {
+                                        max: new Date().toISOString().split("T")[0], // Set max date to today's date
+                                    },
                                 }}
                                 fullWidth
                             />
